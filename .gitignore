@@ -6,3 +6,5 @@
 /.php-cs-fixer.dist.php.bak
 /.idea/
 /.vscode/
+/.cache/
+/composer.phar
