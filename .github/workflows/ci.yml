@@ -64,7 +64,7 @@ jobs:
         run: vendor/bin/phpunit
 
       - name: PHPStan
-        run: vendor/bin/phpstan analyse --no-progress
+        run: vendor/bin/phpstan analyse -c phpstan.neon.dist --no-progress
 
       - name: CS Fixer (dry-run)
         run: vendor/bin/php-cs-fixer fix --dry-run --diff

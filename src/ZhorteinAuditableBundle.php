@@ -35,8 +35,6 @@ final class ZhorteinAuditableBundle extends Bundle
                 [],
                 // Enabled parameter: false = always enabled
                 false,
-                // Alias map: keep empty (short namespace aliases are deprecated/removed)
-                [],
             )
         );
     }
