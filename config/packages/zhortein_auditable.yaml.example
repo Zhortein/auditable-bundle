@@ -1,0 +1,45 @@
+# Zhortein Auditable Bundle Configuration Example
+#
+# Copy this file to your application's config/packages/ directory
+# and adjust settings to your needs.
+#
+# For more information, see:
+# - README.md
+# - https://github.com/zhortein/auditable-bundle
+
+zhortein_auditable:
+  # Master enable/disable switch for the entire auditing system
+  enabled: true
+
+  # Async message persistence configuration
+  async:
+    # Set to true to dispatch audit messages to Messenger (recommended)
+    # Set to false for synchronous persistence (audit records written immediately)
+    enabled: true
+
+    # Messenger transport name where PersistAuditEntryMessage will be dispatched
+    # Must match a transport configured in config/packages/messenger.yaml
+    transport: 'async'
+
+  # Doctrine listener configuration - what operations to track
+  listener:
+    # Track entity creations (INSERT)
+    track_insert: true
+
+    # Track entity updates (UPDATE)
+    track_update: true
+
+    # Track entity deletions (DELETE)
+    track_delete: true
+
+  # Field value serialization configuration
+  fields:
+    # Maximum length for stringified field values in audit records
+    # Prevents extremely long values from bloating the audit table
+    max_string_length: 180
+
+    # List of global property names to always ignore across all entities
+    # Useful for transient fields (cache, temp state, etc.)
+    global_ignored:
+      - 'createdAt'
+      - 'updatedAt'
