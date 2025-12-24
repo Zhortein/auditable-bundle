@@ -65,7 +65,7 @@ final readonly class Historizer
 
             $this->writer->write($message);
         } catch (\Throwable $e) {
-            // Historisation ne doit JAMAIS casser le flux métier
+            // Auditing must never break business logic flow
             $this->logger->error($e->getMessage(), ['exception' => $e]);
         }
     }

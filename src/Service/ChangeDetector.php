@@ -61,10 +61,13 @@ final readonly class ChangeDetector
                 if (method_exists($item, '__toString')) {
                     $sample[] = (string) $item;
                 } elseif (method_exists($item, 'getName')) {
+                    /* @phpstan-ignore-next-line method.undefined */
                     $sample[] = (string) $item->getName();
                 } elseif (method_exists($item, 'getTitle')) {
+                    /* @phpstan-ignore-next-line method.undefined */
                     $sample[] = (string) $item->getTitle();
                 } elseif (method_exists($item, 'getId')) {
+                    /* @phpstan-ignore-next-line method.undefined */
                     $sample[] = \sprintf('%s#%s', (new \ReflectionClass($item))->getShortName(), (string) $item->getId());
                 } else {
                     $sample[] = (new \ReflectionClass($item))->getShortName();

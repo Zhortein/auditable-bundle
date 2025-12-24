@@ -1,0 +1,26 @@
+# Messenger Configuration Example for Zhortein Auditable Bundle
+#
+# This example shows how to configure Symfony Messenger to handle
+# asynchronous audit message persistence.
+#
+# For more information, see:
+# - https://symfony.com/doc/current/messenger.html
+
+framework:
+  messenger:
+    # Define message buses
+    buses:
+      messenger.bus.default:
+        middleware:
+          - handle_message
+
+    # Define transports for asynchronous message handling
+    transports:
+      # 'async' transport using Doctrine DBAL (database-backed queue)
+      # Alternative: use 'doctrine://default' for the default entity manager
+      async: '%env(MESSENGER_TRANSPORT_DSN)%'
+
+    # Route messages to transports
+    routing:
+      # Route audit entry messages to the async transport for background processing
+      'Zhortein\AuditableBundle\Message\PersistAuditEntryMessage': async

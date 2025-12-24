@@ -16,8 +16,8 @@ final readonly class AsyncAuditEntryWriter implements AuditEntryWriterInterface
 
     public function write(PersistAuditEntryMessage $message): void
     {
-        // On laisse le routage Messenger gérer le transport.
-        // Le champ $transport est prêt si tu veux forcer plus tard (stamp).
+        // Let Messenger routing handle the transport configuration.
+        // The $transport field is ready for future enhancement (e.g., Messenger Stamp).
         $this->bus->dispatch($message);
     }
 }

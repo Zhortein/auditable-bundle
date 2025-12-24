@@ -38,16 +38,18 @@ return [
 ];
 ```
 
-### Doctrine mapping
+### Doctrine mapping & migrations
 
-The bundle ships a Doctrine entity (`History`). Its mapping is registered automatically by a compiler pass, so you **don’t need** to declare a `doctrine.orm.mappings` entry manually.
+The bundle ships a Doctrine entity (`AuditEntry`). Its mapping is registered automatically by a compiler pass, so you **don't need** to declare a `doctrine.orm.mappings` entry manually.
 
-Run your migrations after installation:
+**Generate and run migrations** after installation:
 
 ```bash
 php bin/console doctrine:migrations:diff
 php bin/console doctrine:migrations:migrate
 ```
+
+This creates the `audit_entry` table with the necessary schema for storing audit trail entries.
 
 ## Quick start
 
@@ -69,11 +71,13 @@ class Customer
 }
 ```
 
-### 2) (Recommended) Enable async writing
+### 2) (Recommended) Configure async message handling
 
-If your project already has Messenger with an `async` transport, you’re basically done.
+By default, the bundle is configured for **async persistence** via Symfony Messenger.
 
-Otherwise, define a transport (example):
+#### Step A: Define the Messenger transport
+
+If your project doesn't already have a Messenger `async` transport, add one:
 
 ```yaml
 # config/packages/messenger.yaml
@@ -81,53 +85,84 @@ framework:
   messenger:
     transports:
       async: '%env(MESSENGER_TRANSPORT_DSN)%'
+    routing:
+      'Zhortein\AuditableBundle\Message\PersistAuditEntryMessage': async
 ```
 
-Then configure the bundle to use it:
+See `config/packages/messenger.yaml.example` in the bundle for a complete configuration example.
+
+#### Step B: Configure the bundle
+
+Create or update the bundle configuration:
 
 ```yaml
 # config/packages/zhortein_auditable.yaml
 zhortein_auditable:
   enabled: true
-  writer:
-    async: true
+  async:
+    enabled: true
     transport: 'async'
 ```
 
-> If `async` is disabled, audits are written synchronously.
+See `config/packages/zhortein_auditable.yaml.example` in the bundle for all available options.
 
-## Configuration
+#### Synchronous mode (optional)
+
+If you prefer **synchronous persistence** (audit records written immediately without Messenger):
 
 ```yaml
-# config/packages/zhortein_auditable.yaml
 zhortein_auditable:
   enabled: true
-
-  actor:
-    # Strategy used to resolve "who did it"
-    # Default: security_token (falls back to null if no authenticated user)
-    resolver: 'security_token'
-
-  writer:
-    async: true
-    transport: 'async'
-
-  tracking:
-    ip: true
-    user_agent: true
-    route: true
+  async:
+    enabled: false
 ```
+
+> **Note**: Async mode is recommended for production to avoid blocking request handling with database writes.
+
+## Configuration reference
+
+The bundle's configuration options are documented with comments in `config/packages/zhortein_auditable.yaml.example`.
+
+**Key settings:**
+
+- **`enabled`**: Master switch to enable/disable auditing globally (default: `true`)
+- **`async.enabled`**: Use Messenger for async persistence (default: `true`)
+- **`async.transport`**: Messenger transport name for audit messages (default: `'async'`)
+- **`listener.track_insert/update/delete`**: Control which operations are tracked (all default to `true`)
+- **`fields.max_string_length`**: Maximum length for serialized field values (default: `180`)
+- **`fields.global_ignored`**: List of properties to always exclude from all entities (default: `[]`)
+
+**Actor resolution:**
+
+By default, the bundle uses Symfony Security to resolve the current user via `SecurityActorResolver`. No additional configuration is needed.
+
+The resolver automatically handles:
+- Regular authenticated users → stores user ID or user identifier
+- Null users (not authenticated) → stores `null`
+- Impersonation → stores both original user and impersonator IDs
 
 ## What gets stored
 
-Each `History` record typically contains:
+Each `AuditEntry` record in the audit trail contains:
 
-- entity class + entity id
-- action (create/update/delete)
-- actor (user id / identifier, depending on resolver)
-- datetime
-- route + IP + user-agent (optional)
-- changes (field name, old/new), excluding `#[AuditIgnore]` properties
+- **Entity metadata**: Fully qualified class name and entity ID
+- **Action**: One of `create`, `update`, `delete`, or `log`
+- **Level**: Severity level (`debug`, `info`, `warning`, `error`, `critical`)
+- **Title & Description**: Human-readable summary of the change
+- **Context**: Optional context tag for grouping related entities
+- **Actor**: User ID or identifier of who made the change (null if unauthenticated)
+- **Impersonator**: Original user ID if the change was made during impersonation
+- **Timestamp**: When the change occurred (as `DateTimeImmutable`)
+- **Data**: JSON-encoded field changes (old value → new value), excluding `#[AuditIgnore]` properties
+
+**Example audit entry for an update:**
+```
+Title: "Update [Customer] - 2 field(s) changed"
+Description: 
+  - "Email: john@example.com → john.doe@example.com"
+  - "Phone: +1234567890 → +1987654321"
+Data: { "email": { "old": "john@example.com", "new": "john.doe@example.com" }, ... }
+```
 
 ## Security / PII
 
