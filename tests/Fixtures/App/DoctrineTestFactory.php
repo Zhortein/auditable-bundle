@@ -21,6 +21,10 @@ final class DoctrineTestFactory
             \dirname(__DIR__).'/Entity',
         ], true);
 
+        if (\PHP_VERSION_ID >= 80400 && method_exists($configuration, 'enableNativeLazyObjects')) {
+            $configuration->enableNativeLazyObjects(true);
+        }
+
         return new EntityManager($connection, $configuration, $eventManager);
     }
 }

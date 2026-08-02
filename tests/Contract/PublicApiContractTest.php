@@ -40,6 +40,17 @@ final class PublicApiContractTest extends TestCase
         ];
 
         self::assertHistoricalContractIsPreserved($historical, $current);
+        $reflection = new \ReflectionClass(CanonicalTypeChild::class);
+
+        self::assertSame('self', self::type($reflection->getMethod('selfType')->getReturnType(), $reflection));
+        self::assertSame('parent', self::type($reflection->getMethod('parentType')->getReturnType(), $reflection));
+        self::assertSame('static', self::type($reflection->getMethod('staticType')->getReturnType(), $reflection));
+        self::assertSame('?self', self::type($reflection->getMethod('nullableSelfType')->getReturnType(), $reflection));
+        self::assertSame('self|string', self::type($reflection->getMethod('unionType')->getReturnType(), $reflection));
+        self::assertSame(
+            CanonicalTypeLeft::class.'&'.CanonicalTypeRight::class,
+            self::type($reflection->getMethod('intersectionType')->getReturnType(), $reflection),
+        );
     }
 
     /** @param array<string, mixed> $current */
@@ -77,7 +88,7 @@ final class PublicApiContractTest extends TestCase
                 foreach ($method->getParameters() as $parameter) {
                     $parameters[] = [
                         'name' => $parameter->getName(),
-                        'type' => self::type($parameter->getType()),
+                        'type' => self::type($parameter->getType(), $reflection),
                         'by_reference' => $parameter->isPassedByReference(),
                         'variadic' => $parameter->isVariadic(),
                         'has_default' => $parameter->isDefaultValueAvailable(),
@@ -86,7 +97,7 @@ final class PublicApiContractTest extends TestCase
                 }
                 $methods[$method->getName()] = [
                     'static' => $method->isStatic(),
-                    'return' => self::type($method->getReturnType()),
+                    'return' => self::type($method->getReturnType(), $reflection),
                     'parameters' => $parameters,
                 ];
             }
@@ -98,7 +109,7 @@ final class PublicApiContractTest extends TestCase
                     continue;
                 }
                 $properties[$property->getName()] = [
-                    'type' => self::type($property->getType()),
+                    'type' => self::type($property->getType(), $reflection),
                     'readonly' => $property->isReadOnly(),
                     'static' => $property->isStatic(),
                 ];
@@ -196,22 +207,30 @@ final class PublicApiContractTest extends TestCase
         return $symbols;
     }
 
-    private static function type(?\ReflectionType $type): ?string
+    /** @param \ReflectionClass<object> $declaringClass */
+    private static function type(?\ReflectionType $type, \ReflectionClass $declaringClass): ?string
     {
         if (null === $type) {
             return null;
         }
         if ($type instanceof \ReflectionNamedType) {
-            return ($type->allowsNull() && 'mixed' !== $type->getName() ? '?' : '').$type->getName();
+            $name = $type->getName();
+            if ($name === $declaringClass->getName()) {
+                $name = 'self';
+            } elseif (false !== $declaringClass->getParentClass() && $name === $declaringClass->getParentClass()->getName()) {
+                $name = 'parent';
+            }
+
+            return ($type->allowsNull() && 'mixed' !== $name ? '?' : '').$name;
         }
         if ($type instanceof \ReflectionUnionType) {
-            return implode('|', array_map(self::type(...), $type->getTypes()));
+            return implode('|', array_map(static fn (\ReflectionType $member): ?string => self::type($member, $declaringClass), $type->getTypes()));
         }
         if (!$type instanceof \ReflectionIntersectionType) {
             throw new \LogicException('Unsupported reflection type.');
         }
 
-        return implode('&', array_map(self::type(...), $type->getTypes()));
+        return implode('&', array_map(static fn (\ReflectionType $member): ?string => self::type($member, $declaringClass), $type->getTypes()));
     }
 
     private static function value(mixed $value): mixed
@@ -232,5 +251,50 @@ final class PublicApiContractTest extends TestCase
         $attributes = $reflection->getAttributes(\Attribute::class);
 
         return [] === $attributes ? null : $attributes[0]->newInstance()->flags;
+    }
+}
+
+interface CanonicalTypeLeft
+{
+}
+
+interface CanonicalTypeRight
+{
+}
+
+class CanonicalTypeParent
+{
+}
+
+final class CanonicalTypeChild extends CanonicalTypeParent
+{
+    public function selfType(): self
+    {
+        throw new \LogicException();
+    }
+
+    public function parentType(): parent
+    {
+        throw new \LogicException();
+    }
+
+    public function staticType(): static
+    {
+        throw new \LogicException();
+    }
+
+    public function nullableSelfType(): ?self
+    {
+        throw new \LogicException();
+    }
+
+    public function unionType(): self|string
+    {
+        throw new \LogicException();
+    }
+
+    public function intersectionType(): CanonicalTypeLeft&CanonicalTypeRight
+    {
+        throw new \LogicException();
     }
 }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Zhortein\AuditableBundle\Tests\Fixtures\App;
 
+use Composer\InstalledVersions;
+use Composer\Semver\VersionParser;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
@@ -32,6 +34,21 @@ final class TestKernel extends Kernel
     public function registerContainerConfiguration(LoaderInterface $loader): void
     {
         $loader->load(function (ContainerBuilder $container): void {
+            $ormConfig = [
+                'mappings' => [
+                    'TestFixtures' => [
+                        'type' => 'attribute',
+                        'dir' => \dirname(__DIR__).'/Entity',
+                        'prefix' => 'Zhortein\\AuditableBundle\\Tests\\Fixtures\\Entity',
+                        'is_bundle' => false,
+                    ],
+                ],
+            ];
+
+            if (InstalledVersions::satisfies(new VersionParser(), 'doctrine/doctrine-bundle', '^2.0')) {
+                $ormConfig['auto_generate_proxy_classes'] = true;
+            }
+
             $container->loadFromExtension('framework', [
                 'secret' => 'auditable-characterization-tests',
                 'test' => true,
@@ -43,17 +60,7 @@ final class TestKernel extends Kernel
             ]);
             $container->loadFromExtension('doctrine', [
                 'dbal' => ['url' => 'sqlite:///:memory:'],
-                'orm' => [
-                    'auto_generate_proxy_classes' => true,
-                    'mappings' => [
-                        'TestFixtures' => [
-                            'type' => 'attribute',
-                            'dir' => \dirname(__DIR__).'/Entity',
-                            'prefix' => 'Zhortein\\AuditableBundle\\Tests\\Fixtures\\Entity',
-                            'is_bundle' => false,
-                        ],
-                    ],
-                ],
+                'orm' => $ormConfig,
             ]);
             $container->loadFromExtension('zhortein_auditable', $this->bundleConfig);
         });
