@@ -32,6 +32,8 @@ return static function (ContainerConfigurator $container): void {
             __DIR__ . '/../src/Attribute/',
             __DIR__ . '/../src/Enum/',
             __DIR__ . '/../src/Message/',
+            __DIR__ . '/../src/Transactional/Contract/',
+            __DIR__ . '/../src/Transactional/Model/',
         ]);
 
     $services->set(AuditableMetadataProvider::class);

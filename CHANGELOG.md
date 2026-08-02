@@ -11,6 +11,7 @@
 ### Added
 
 - Direct runtime dependency on symfony/polyfill-mbstring, allowing the bundle to run without the native mbstring extension.
+- Add immutable transactional audit contracts and data-transfer objects without changing the legacy runtime behavior.
 
 ## [1.0.0] - 2025-12-24
 
