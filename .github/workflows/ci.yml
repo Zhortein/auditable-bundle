@@ -4,61 +4,176 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
+# DoctrineBundle 2 excludes Symfony 8. ORM 2 is outside the next release baseline.
 jobs:
-  tests:
+  compatibility:
+    name: Compatibility / ${{ matrix.name }}
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
         include:
-          - php: "8.3"
+          - name: PHP 8.3 / Symfony 7.4 / DBundle 2.19 / ORM 3 / lowest
+            php: "8.3"
             symfony: "7.4.*"
-            composer_flags: ""
-            deprecations: "max[direct]=0"
-
-          - php: "8.4"
+            doctrine_bundle: "2.19"
+            doctrine_bundle_major: "2"
+            doctrine_orm: "3"
+            doctrine_dbal: "3"
+            doctrine_persistence: "3"
+            dependency_flags: "--prefer-lowest --prefer-stable"
+          - name: PHP 8.3 / Symfony 7.4 / DBundle 2 / ORM 3 / latest
+            php: "8.3"
             symfony: "7.4.*"
-            composer_flags: ""
-            deprecations: "max[direct]=0"
-
-          # Symfony 8 requires PHP 8.4+
-          - php: "8.4"
+            doctrine_bundle: "2"
+            doctrine_bundle_major: "2"
+            doctrine_orm: "3"
+            doctrine_dbal: "4"
+            doctrine_persistence: "4"
+            dependency_flags: ""
+          - name: PHP 8.4 / Symfony 7.4 / DBundle 3 / ORM 3 / latest
+            php: "8.4"
+            symfony: "7.4.*"
+            doctrine_bundle: "3"
+            doctrine_bundle_major: "3"
+            doctrine_orm: "3"
+            doctrine_dbal: "4"
+            doctrine_persistence: "4"
+            dependency_flags: ""
+          - name: PHP 8.4 / Symfony 8.0 / DBundle 3 / ORM 3 / latest
+            php: "8.4"
             symfony: "8.0.*"
-            composer_flags: ""
-            deprecations: "max[direct]=0"
-
+            doctrine_bundle: "3"
+            doctrine_bundle_major: "3"
+            doctrine_orm: "3"
+            doctrine_dbal: "4"
+            doctrine_persistence: "4"
+            dependency_flags: ""
+          - name: PHP 8.5 / Symfony 7.4 / DBundle 3 / ORM 3 / latest
+            php: "8.5"
+            symfony: "7.4.*"
+            doctrine_bundle: "3"
+            doctrine_bundle_major: "3"
+            doctrine_orm: "3"
+            doctrine_dbal: "4"
+            doctrine_persistence: "4"
+            dependency_flags: ""
+          - name: PHP 8.5 / Symfony 8.x latest / DBundle 3 / ORM 3 / latest
+            php: "8.5"
+            symfony: "8.*"
+            symfony_resolved: "8.1.*"
+            doctrine_bundle: "3"
+            doctrine_bundle_major: "3"
+            doctrine_orm: "3"
+            doctrine_dbal: "4"
+            doctrine_persistence: "4"
+            dependency_flags: ""
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
         with:
           php-version: "${{ matrix.php }}"
+          extensions: pdo_sqlite, mbstring, dom, xml, zip
           tools: composer:v2
           coverage: none
-
-      - name: Validate composer.json
-        run: composer validate --strict
-
-      - name: Install Symfony Flex (for SYMFONY_REQUIRE)
+      - name: Install Symfony Flex
         run: |
           composer global config --no-plugins allow-plugins.symfony/flex true
-          composer global require --no-progress --no-scripts --no-plugins symfony/flex
-
-      - name: Install dependencies
+          composer global require --no-progress --no-scripts --no-plugins symfony/flex:^2
+      - name: Resolve dependencies
         env:
           SYMFONY_REQUIRE: "${{ matrix.symfony }}"
-        run: |
-          composer update --prefer-dist --no-progress ${{ matrix.composer_flags }}
-
+        run: composer update --prefer-dist --no-interaction --no-progress --with "doctrine/doctrine-bundle:^${{ matrix.doctrine_bundle }}.0" --with "doctrine/orm:^${{ matrix.doctrine_orm }}.0" ${{ matrix.dependency_flags }}
+      - run: composer validate --strict
+      - name: Assert resolved versions
+        run: php .github/ci/assert-versions.php "${{ matrix.php }}" "${{ matrix.symfony_resolved || matrix.symfony }}" "${{ matrix.doctrine_bundle_major }}" "${{ matrix.doctrine_orm }}" "${{ matrix.doctrine_dbal }}" "${{ matrix.doctrine_persistence }}"
+      - run: composer check-platform-reqs
       - name: PHPUnit
         env:
-          SYMFONY_DEPRECATIONS_HELPER: "${{ matrix.deprecations }}"
-        run: vendor/bin/phpunit
+          SYMFONY_DEPRECATIONS_HELPER: "max[direct]=0"
+        run: composer test
 
-      - name: PHPStan
-        run: vendor/bin/phpstan analyse -c phpstan.neon.dist --no-progress
+  static-analysis:
+    name: Static analysis / ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Symfony 7.4 / ORM 3 latest
+            symfony: "7.4.*"
+            doctrine_bundle: "3"
+            doctrine_orm: "3"
+          - name: Symfony 8.x / ORM 3 latest
+            symfony: "8.*"
+            doctrine_bundle: "3"
+            doctrine_orm: "3"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: pdo_sqlite, mbstring, dom, xml, zip
+          tools: composer:v2
+          coverage: none
+      - name: Install Symfony Flex
+        run: |
+          composer global config --no-plugins allow-plugins.symfony/flex true
+          composer global require --no-progress --no-scripts --no-plugins symfony/flex:^2
+      - name: Resolve dependencies
+        env:
+          SYMFONY_REQUIRE: "${{ matrix.symfony }}"
+        run: composer update --prefer-dist --no-interaction --no-progress --with "doctrine/doctrine-bundle:^${{ matrix.doctrine_bundle }}.0" --with "doctrine/orm:^${{ matrix.doctrine_orm }}.0"
+      - run: composer validate --strict
+      - run: composer phpstan -- --memory-limit=512M
 
-      - name: CS Fixer (dry-run)
-        run: vendor/bin/php-cs-fixer fix --dry-run --diff
+  coding-style:
+    name: Coding style
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: pdo_sqlite, mbstring, dom, xml, zip
+          tools: composer:v2
+          coverage: none
+      - name: Install Symfony Flex
+        run: |
+          composer global config --no-plugins allow-plugins.symfony/flex true
+          composer global require --no-progress --no-scripts --no-plugins symfony/flex:^2
+      - name: Resolve dependencies
+        env:
+          SYMFONY_REQUIRE: "7.4.*"
+        run: composer update --prefer-dist --no-interaction --no-progress --with doctrine/doctrine-bundle:^3.0 --with doctrine/orm:^3.0
+      - run: composer validate --strict
+      - run: composer cs:check
+
+  security-audit:
+    name: Security audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.5"
+          extensions: pdo_sqlite, mbstring, dom, xml, zip
+          tools: composer:v2
+          coverage: none
+      - name: Install Symfony Flex
+        run: |
+          composer global config --no-plugins allow-plugins.symfony/flex true
+          composer global require --no-progress --no-scripts --no-plugins symfony/flex:^2
+      - name: Resolve dependencies
+        env:
+          SYMFONY_REQUIRE: "8.*"
+        run: composer update --prefer-dist --no-interaction --no-progress --with doctrine/doctrine-bundle:^3.0 --with doctrine/orm:^3.0
+      - run: composer validate --strict
+      - run: composer audit --locked --no-interaction
