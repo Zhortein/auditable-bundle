@@ -26,6 +26,8 @@ jobs:
             doctrine_dbal: "3"
             doctrine_persistence: "3"
             dependency_flags: "--prefer-lowest --prefer-stable"
+            native_mbstring: false
+            extensions: "pdo_sqlite, :mbstring, iconv, dom, xml, zip"
           - name: PHP 8.3 / Symfony 7.4 / DBundle 2 / ORM 3 / latest
             php: "8.3"
             symfony: "7.4.*"
@@ -35,6 +37,8 @@ jobs:
             doctrine_dbal: "4"
             doctrine_persistence: "4"
             dependency_flags: ""
+            native_mbstring: true
+            extensions: "pdo_sqlite, mbstring, iconv, dom, xml, zip"
           - name: PHP 8.4 / Symfony 7.4 / DBundle 3 / ORM 3 / latest
             php: "8.4"
             symfony: "7.4.*"
@@ -44,6 +48,8 @@ jobs:
             doctrine_dbal: "4"
             doctrine_persistence: "4"
             dependency_flags: ""
+            native_mbstring: true
+            extensions: "pdo_sqlite, mbstring, iconv, dom, xml, zip"
           - name: PHP 8.4 / Symfony 8.0 / DBundle 3 / ORM 3 / latest
             php: "8.4"
             symfony: "8.0.*"
@@ -53,6 +59,8 @@ jobs:
             doctrine_dbal: "4"
             doctrine_persistence: "4"
             dependency_flags: ""
+            native_mbstring: true
+            extensions: "pdo_sqlite, mbstring, iconv, dom, xml, zip"
           - name: PHP 8.5 / Symfony 7.4 / DBundle 3 / ORM 3 / latest
             php: "8.5"
             symfony: "7.4.*"
@@ -62,6 +70,8 @@ jobs:
             doctrine_dbal: "4"
             doctrine_persistence: "4"
             dependency_flags: ""
+            native_mbstring: true
+            extensions: "pdo_sqlite, mbstring, iconv, dom, xml, zip"
           - name: PHP 8.5 / Symfony 8.x latest / DBundle 3 / ORM 3 / latest
             php: "8.5"
             symfony: "8.*"
@@ -72,12 +82,14 @@ jobs:
             doctrine_dbal: "4"
             doctrine_persistence: "4"
             dependency_flags: ""
+            native_mbstring: true
+            extensions: "pdo_sqlite, mbstring, iconv, dom, xml, zip"
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "${{ matrix.php }}"
-          extensions: pdo_sqlite, mbstring, dom, xml, zip
+          extensions: "${{ matrix.extensions }}"
           tools: composer:v2
           coverage: none
       - name: Install Symfony Flex
@@ -90,12 +102,21 @@ jobs:
         run: composer update --prefer-dist --no-interaction --no-progress --with "doctrine/doctrine-bundle:^${{ matrix.doctrine_bundle }}.0" --with "doctrine/orm:^${{ matrix.doctrine_orm }}.0" ${{ matrix.dependency_flags }}
       - run: composer validate --strict
       - name: Assert resolved versions
+        env:
+          EXPECT_NATIVE_MBSTRING: "${{ matrix.native_mbstring }}"
         run: php .github/ci/assert-versions.php "${{ matrix.php }}" "${{ matrix.symfony_resolved || matrix.symfony }}" "${{ matrix.doctrine_bundle_major }}" "${{ matrix.doctrine_orm }}" "${{ matrix.doctrine_dbal }}" "${{ matrix.doctrine_persistence }}"
       - run: composer check-platform-reqs
       - name: PHPUnit
         env:
           SYMFONY_DEPRECATIONS_HELPER: "max[direct]=0"
-        run: composer test
+        run: |
+          if [[ "${{ matrix.native_mbstring }}" == "false" ]]; then
+            # PHPUnit 11's launcher requires native mbstring. Calling its
+            # application directly runs the same 67 tests with the polyfill.
+            php -r 'require "vendor/autoload.php"; exit((new PHPUnit\TextUI\Application())->run(["phpunit"]));'
+          else
+            composer test
+          fi
 
   static-analysis:
     name: Static analysis / ${{ matrix.name }}
@@ -118,7 +139,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.4"
-          extensions: pdo_sqlite, mbstring, dom, xml, zip
+          extensions: pdo_sqlite, mbstring, iconv, dom, xml, zip
           tools: composer:v2
           coverage: none
       - name: Install Symfony Flex
@@ -141,7 +162,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.4"
-          extensions: pdo_sqlite, mbstring, dom, xml, zip
+          extensions: pdo_sqlite, mbstring, iconv, dom, xml, zip
           tools: composer:v2
           coverage: none
       - name: Install Symfony Flex
@@ -164,7 +185,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.5"
-          extensions: pdo_sqlite, mbstring, dom, xml, zip
+          extensions: pdo_sqlite, mbstring, iconv, dom, xml, zip
           tools: composer:v2
           coverage: none
       - name: Install Symfony Flex

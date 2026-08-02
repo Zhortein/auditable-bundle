@@ -78,6 +78,16 @@ final class ChangeDetectorTest extends TestCase
         self::assertSame(5, mb_strlen(self::stringify(new ChangeDetector(5), '123456789')));
     }
 
+    public function testUtf8TruncationCountsCharactersAndPreservesMultibyteCharacters(): void
+    {
+        $result = self::stringify(new ChangeDetector(6), 'Éléphant à Tokyo');
+
+        self::assertSame('Éléph…', $result);
+        self::assertSame(6, mb_strlen($result));
+        self::assertGreaterThan(6, \strlen($result));
+        self::assertSame(1, preg_match('//u', $result));
+    }
+
     public function testZeroAndNegativeLengthsDisableTruncation(): void
     {
         self::assertSame('123456789', self::stringify(new ChangeDetector(0), '123456789'));
