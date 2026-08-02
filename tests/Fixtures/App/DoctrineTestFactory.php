@@ -14,12 +14,25 @@ final class DoctrineTestFactory
 {
     public static function createEntityManager(): EntityManagerInterface
     {
-        $eventManager = new EventManager();
-        $connection = DriverManager::getConnection(['driver' => 'pdo_sqlite', 'memory' => true]);
-        $configuration = ORMSetup::createAttributeMetadataConfiguration([
+        return self::createForPaths([
             \dirname(__DIR__, 3).'/src/Entity',
             \dirname(__DIR__).'/Entity',
-        ], true);
+        ]);
+    }
+
+    public static function createTransactionalEntityManager(): EntityManagerInterface
+    {
+        return self::createForPaths([
+            \dirname(__DIR__).'/Transactional/Entity',
+        ]);
+    }
+
+    /** @param list<string> $paths */
+    private static function createForPaths(array $paths): EntityManagerInterface
+    {
+        $eventManager = new EventManager();
+        $connection = DriverManager::getConnection(['driver' => 'pdo_sqlite', 'memory' => true]);
+        $configuration = ORMSetup::createAttributeMetadataConfiguration($paths, true);
 
         if (\PHP_VERSION_ID >= 80400 && method_exists($configuration, 'enableNativeLazyObjects')) {
             $configuration->enableNativeLazyObjects(true);

@@ -13,6 +13,8 @@ use Zhortein\AuditableBundle\Service\ChangeDetector;
 use Zhortein\AuditableBundle\Service\Historizer;
 use Zhortein\AuditableBundle\Service\SecurityActorResolver;
 use Zhortein\AuditableBundle\Service\SyncAuditEntryWriter;
+use Zhortein\AuditableBundle\Transactional\Contract\IdentifierExtractorInterface;
+use Zhortein\AuditableBundle\Transactional\Service\DoctrineIdentifierExtractor;
 
 use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
 
@@ -33,8 +35,11 @@ return static function (ContainerConfigurator $container): void {
             __DIR__ . '/../src/Enum/',
             __DIR__ . '/../src/Message/',
             __DIR__ . '/../src/Transactional/Contract/',
+            __DIR__ . '/../src/Transactional/Exception/',
             __DIR__ . '/../src/Transactional/Model/',
         ]);
+
+    $services->alias(IdentifierExtractorInterface::class, DoctrineIdentifierExtractor::class);
 
     $services->set(AuditableMetadataProvider::class);
 
