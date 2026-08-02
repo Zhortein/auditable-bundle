@@ -2,6 +2,15 @@
 
 A lightweight Symfony bundle for automatic audit trail tracking on Doctrine ORM entities.
 
+## Requirements
+
+- PHP 8.3 or later
+- Symfony 7.4 or 8.x
+- Doctrine ORM 3.x
+- DoctrineBundle 2.19 or 3.x
+
+The bundle includes `symfony/polyfill-mbstring`, so the native `mbstring` extension is optional. The native extension remains recommended for the best multibyte string performance.
+
 ## Overview
 
 This bundle provides a declarative, attribute-based system to automatically track changes to your Doctrine entities. When you mark an entity with `#[Auditable]`, the bundle's Doctrine listener automatically captures:

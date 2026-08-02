@@ -18,9 +18,12 @@ A lightweight Symfony bundle to automatically **audit and historize Doctrine ORM
 ## Requirements
 
 - PHP 8.3+
-- Symfony 7.4+ (Symfony 8.x supported)
-- Doctrine ORM + DoctrineBundle
+- Symfony 7.4 or 8.x
+- Doctrine ORM 3.x
+- DoctrineBundle 2.19 or 3.x
 - Symfony Messenger (optional but recommended for async)
+
+The bundle includes `symfony/polyfill-mbstring`, so the native `mbstring` extension is not required. Installing the native extension remains recommended for the best multibyte string performance.
 
 ## Installation
 
