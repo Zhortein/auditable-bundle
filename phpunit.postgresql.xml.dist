@@ -6,9 +6,8 @@
         colors="true"
 >
     <testsuites>
-        <testsuite name="AuditableBundle">
-            <directory>tests</directory>
-            <exclude>tests/Integration/PostgreSql</exclude>
+        <testsuite name="TransactionalPostgreSQL">
+            <directory>tests/Integration/PostgreSql</directory>
         </testsuite>
     </testsuites>
 
