@@ -22,6 +22,7 @@ final class ZhorteinAuditableExtension extends Extension
         $config = $this->processConfiguration($configuration, $configs);
 
         $container->setParameter('zhortein_auditable.enabled', (bool) $config['enabled']);
+        $container->setParameter('zhortein_auditable.legacy_mapping.enabled', (bool) $config['legacy_mapping']['enabled']);
 
         $container->setParameter('zhortein_auditable.async.enabled', (bool) $config['async']['enabled']);
         $container->setParameter('zhortein_auditable.async.transport', (string) $config['async']['transport']);

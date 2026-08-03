@@ -15,8 +15,19 @@ final class Configuration implements ConfigurationInterface
 
         $root = $treeBuilder->getRootNode();
         $root
+            ->validate()
+            ->ifTrue(static fn (array $config): bool => $config['enabled'] && !$config['legacy_mapping']['enabled'])
+            ->thenInvalid('The legacy Doctrine mapping cannot be disabled while legacy auditing is enabled. Set "enabled" to false first.')
+            ->end()
             ->children()
             ->booleanNode('enabled')->defaultTrue()->end()
+
+            ->arrayNode('legacy_mapping')
+            ->addDefaultsIfNotSet()
+            ->children()
+            ->booleanNode('enabled')->defaultTrue()->end()
+            ->end()
+            ->end()
 
             ->arrayNode('transactional')
             ->addDefaultsIfNotSet()

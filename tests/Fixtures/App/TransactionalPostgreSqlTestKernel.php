@@ -24,6 +24,7 @@ final class TransactionalPostgreSqlTestKernel extends Kernel
 {
     public const NORMAL = 'postgresql_transactional';
     public const FAILING_STORAGE = 'postgresql_transactional_failing_storage';
+    public const WITHOUT_LEGACY_MAPPING = 'postgresql_transactional_without_legacy_mapping';
 
     private readonly string $databaseUrl;
 
@@ -56,7 +57,8 @@ final class TransactionalPostgreSqlTestKernel extends Kernel
     public function registerContainerConfiguration(LoaderInterface $loader): void
     {
         $databaseUrl = $this->databaseUrl;
-        $loader->load(static function (ContainerBuilder $container) use ($databaseUrl): void {
+        $withoutLegacyMapping = self::WITHOUT_LEGACY_MAPPING === $this->environment;
+        $loader->load(static function (ContainerBuilder $container) use ($databaseUrl, $withoutLegacyMapping): void {
             $ormConfig = [
                 'mappings' => [
                     'TransactionalPostgreSqlFixtures' => [
@@ -85,6 +87,8 @@ final class TransactionalPostgreSqlTestKernel extends Kernel
                 'orm' => $ormConfig,
             ]);
             $container->loadFromExtension('zhortein_auditable', [
+                'enabled' => !$withoutLegacyMapping,
+                'legacy_mapping' => ['enabled' => !$withoutLegacyMapping],
                 'transactional' => ['enabled' => true],
             ]);
 

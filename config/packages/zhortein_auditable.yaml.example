@@ -11,6 +11,12 @@ zhortein_auditable:
   # Master enable/disable switch for the entire auditing system
   enabled: true
 
+  # Keep the bundle's historical AuditEntry Doctrine mapping by default.
+  # Disabling it requires enabled: false and is intended for applications that
+  # use only their own transactional audit storage. No table is removed automatically.
+  legacy_mapping:
+    enabled: true
+
   # Strict transactional recorder wiring is opt-in and disabled by default.
   # Enabling it requires application services or aliases for
   # AuditEntryFactoryInterface, AuditStorageInterface and Psr\Clock\ClockInterface.

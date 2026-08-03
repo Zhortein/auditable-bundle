@@ -8,10 +8,12 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
+use Doctrine\Persistence\ManagerRegistry;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Uid\UuidV7;
+use Zhortein\AuditableBundle\Entity\AuditEntry;
 use Zhortein\AuditableBundle\Tests\Fixtures\App\TransactionalPostgreSqlTestKernel;
 use Zhortein\AuditableBundle\Tests\Fixtures\Transactional\PostgreSql\DoctrineAuditStorage;
 use Zhortein\AuditableBundle\Tests\Fixtures\Transactional\PostgreSql\Entity\ApplicationAuditEntry;
@@ -143,6 +145,44 @@ final class TransactionalAtomicityIntegrationTest extends TestCase
         }
     }
 
+    public function testTransactionalApplicationCanOwnTheOnlyAuditMapping(): void
+    {
+        [$kernel, $entityManager, $observer] = $this->bootKernel(TransactionalPostgreSqlTestKernel::WITHOUT_LEGACY_MAPPING);
+        $connection = $entityManager->getConnection();
+
+        try {
+            $metadataNames = array_map(
+                static fn ($metadata): string => $metadata->getName(),
+                $entityManager->getMetadataFactory()->getAllMetadata(),
+            );
+            sort($metadataNames);
+            self::assertSame([ApplicationAuditEntry::class, BusinessOperation::class], $metadataNames);
+            self::assertFalse($connection->createSchemaManager()->tablesExist(['audit_entry']));
+            self::assertSame([self::AUDIT_TABLE, self::BUSINESS_TABLE], $this->sortedTableNames($connection));
+
+            $consumer = $kernel->getContainer()->get(TransactionalRecorderConsumer::class);
+            self::assertInstanceOf(TransactionalRecorderConsumer::class, $consumer);
+
+            $connection->beginTransaction();
+            $operation = new BusinessOperation('pending');
+            $entityManager->persist($operation);
+            $operation->changeStatus('completed');
+            $consumer->record($this->auditEvent($operation));
+            $entityManager->flush();
+            $connection->commit();
+
+            $this->assertCounts($observer, 1, 1);
+            self::assertFalse($observer->createSchemaManager()->tablesExist(['audit_entry']));
+            $testContainer = $kernel->getContainer()->get('test.service_container');
+            self::assertInstanceOf(ContainerInterface::class, $testContainer);
+            $registry = $testContainer->get('doctrine');
+            self::assertInstanceOf(ManagerRegistry::class, $registry);
+            self::assertNull($registry->getManagerForClass(AuditEntry::class));
+        } finally {
+            $this->closeResources($kernel, $entityManager, $observer);
+        }
+    }
+
     /** @return array{TransactionalPostgreSqlTestKernel, EntityManagerInterface, Connection} */
     private function bootKernel(string $environment): array
     {
@@ -215,6 +255,15 @@ final class TransactionalAtomicityIntegrationTest extends TestCase
     {
         self::assertSame($business, (int) $connection->fetchOne('SELECT COUNT(*) FROM '.self::BUSINESS_TABLE));
         self::assertSame($audit, (int) $connection->fetchOne('SELECT COUNT(*) FROM '.self::AUDIT_TABLE));
+    }
+
+    /** @return list<string> */
+    private function sortedTableNames(Connection $connection): array
+    {
+        $tables = $connection->createSchemaManager()->listTableNames();
+        sort($tables);
+
+        return $tables;
     }
 
     private function closeResources(

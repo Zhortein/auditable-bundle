@@ -17,6 +17,7 @@
 - Add a manually composable strict transactional recorder that resolves audit subjects, actors and timestamps before delegating to application-supplied entry factories and storage.
 - Add opt-in Symfony container wiring for the strict transactional recorder, requiring application-provided entry factory, storage and PSR-20 clock services.
 - Add a PostgreSQL-backed executable application example proving shared commit, shared rollback and fail-closed behavior with an application-owned UUID v7 audit entity and a Doctrine storage that never flushes.
+- Add an explicit legacy Doctrine mapping opt-out for transactional-only applications, disabled by default and guarded against active legacy auditing.
 
 ## [1.0.0] - 2025-12-24
 

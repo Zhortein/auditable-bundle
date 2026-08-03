@@ -48,6 +48,7 @@ final class DoctrineBundleIntegrationTest extends TestCase
 
     public function testBundleMappingSchemaAndDoctrineListenerUseDoctrineBundleEntityManager(): void
     {
+        self::assertTrue($this->kernel->getContainer()->getParameter('zhortein_auditable.legacy_mapping.enabled'));
         $metadata = $this->entityManager->getClassMetadata(AuditEntry::class);
         self::assertSame(AuditEntry::class, $metadata->getName());
         self::assertSame('audit_entry', $metadata->getTableName());
