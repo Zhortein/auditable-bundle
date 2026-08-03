@@ -14,6 +14,8 @@ final readonly class ApplicationAuditEntryFactory implements AuditEntryFactoryIn
 {
     public function create(AuditRecord $record): ApplicationAuditEntry
     {
+        $actor = $record->actor;
+
         return new ApplicationAuditEntry(
             id: Uuid::v7()->toRfc4122(),
             occurredAt: $record->occurredAt,
@@ -24,10 +26,10 @@ final readonly class ApplicationAuditEntryFactory implements AuditEntryFactoryIn
             context: $record->context,
             subjectType: $record->subject?->type,
             subjectIdentifier: $record->subject?->identifier,
-            actorType: $record->actor?->type,
-            actorIdentifier: $record->actor?->identifier,
-            impersonatorIdentifier: $record->actor?->impersonatorIdentifier,
-            actorMetadata: $record->actor?->metadata ?? [],
+            actorType: $actor?->type,
+            actorIdentifier: $actor?->identifier,
+            impersonatorIdentifier: $actor?->impersonatorIdentifier,
+            actorMetadata: null === $actor ? [] : $actor->metadata,
             isAuto: $record->isAuto,
             data: $record->data,
         );

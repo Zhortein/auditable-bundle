@@ -25,6 +25,7 @@ final readonly class ChangeDetector
         $changes = $uow->getEntityChangeSet($entity);
 
         $formatted = [];
+        /** @var array<string, array{0: mixed, 1: mixed}> $changes */
         foreach ($changes as $field => [$old, $new]) {
             $formatted[$field] = [
                 'old' => $this->stringify($old),
@@ -58,17 +59,21 @@ final readonly class ChangeDetector
             $sample = [];
 
             foreach ($value as $item) {
+                /** @var object $item */
                 if (method_exists($item, '__toString')) {
                     $sample[] = (string) $item;
                 } elseif (method_exists($item, 'getName')) {
-                    /* @phpstan-ignore-next-line method.undefined */
-                    $sample[] = (string) $item->getName();
+                    /** @var scalar|\Stringable|null $name */
+                    $name = $item->getName();
+                    $sample[] = (string) $name;
                 } elseif (method_exists($item, 'getTitle')) {
-                    /* @phpstan-ignore-next-line method.undefined */
-                    $sample[] = (string) $item->getTitle();
+                    /** @var scalar|\Stringable|null $title */
+                    $title = $item->getTitle();
+                    $sample[] = (string) $title;
                 } elseif (method_exists($item, 'getId')) {
-                    /* @phpstan-ignore-next-line method.undefined */
-                    $sample[] = \sprintf('%s#%s', (new \ReflectionClass($item))->getShortName(), (string) $item->getId());
+                    /** @var scalar|\Stringable|null $id */
+                    $id = $item->getId();
+                    $sample[] = \sprintf('%s#%s', (new \ReflectionClass($item))->getShortName(), (string) $id);
                 } else {
                     $sample[] = (new \ReflectionClass($item))->getShortName();
                 }
@@ -91,13 +96,22 @@ final readonly class ChangeDetector
                 return $this->truncate((string) $value);
             }
             if (method_exists($value, 'getName')) {
-                return $this->truncate(\sprintf('[%s#%s]', (new \ReflectionClass($value))->getShortName(), (string) $value->getName()));
+                /** @var scalar|\Stringable|null $name */
+                $name = $value->getName();
+
+                return $this->truncate(\sprintf('[%s#%s]', (new \ReflectionClass($value))->getShortName(), (string) $name));
             }
             if (method_exists($value, 'getTitle')) {
-                return $this->truncate(\sprintf('[%s#%s]', (new \ReflectionClass($value))->getShortName(), (string) $value->getTitle()));
+                /** @var scalar|\Stringable|null $title */
+                $title = $value->getTitle();
+
+                return $this->truncate(\sprintf('[%s#%s]', (new \ReflectionClass($value))->getShortName(), (string) $title));
             }
             if (method_exists($value, 'getId')) {
-                return $this->truncate(\sprintf('[%s#%s]', (new \ReflectionClass($value))->getShortName(), (string) $value->getId()));
+                /** @var scalar|\Stringable|null $id */
+                $id = $value->getId();
+
+                return $this->truncate(\sprintf('[%s#%s]', (new \ReflectionClass($value))->getShortName(), (string) $id));
             }
 
             return $this->truncate(\sprintf('[object %s]', (new \ReflectionClass($value))->getShortName()));
@@ -111,7 +125,10 @@ final readonly class ChangeDetector
             }
         }
 
-        return $this->truncate((string) $value);
+        /** @var scalar|\Stringable|null $stringableValue */
+        $stringableValue = $value;
+
+        return $this->truncate((string) $stringableValue);
     }
 
     private function truncate(string $value): string

@@ -50,7 +50,6 @@ final class PersistencePipelineTest extends TestCase
             new AuditEntryPersister($this->entityManagerExpectingPersistThenFlush($message)),
         );
 
-        self::assertIsCallable($handler);
         $handler($message);
     }
 

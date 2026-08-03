@@ -253,8 +253,12 @@ final class TransactionalAtomicityIntegrationTest extends TestCase
 
     private function assertCounts(Connection $connection, int $business, int $audit): void
     {
-        self::assertSame($business, (int) $connection->fetchOne('SELECT COUNT(*) FROM '.self::BUSINESS_TABLE));
-        self::assertSame($audit, (int) $connection->fetchOne('SELECT COUNT(*) FROM '.self::AUDIT_TABLE));
+        /** @var int|numeric-string $businessCount */
+        $businessCount = $connection->fetchOne('SELECT COUNT(*) FROM '.self::BUSINESS_TABLE);
+        /** @var int|numeric-string $auditCount */
+        $auditCount = $connection->fetchOne('SELECT COUNT(*) FROM '.self::AUDIT_TABLE);
+        self::assertSame($business, (int) $businessCount);
+        self::assertSame($audit, (int) $auditCount);
     }
 
     /** @return list<string> */

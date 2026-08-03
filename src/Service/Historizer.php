@@ -73,6 +73,7 @@ final readonly class Historizer
     private function extractEntityId(object $entity): ?string
     {
         if (method_exists($entity, 'getId')) {
+            /** @var scalar|\Stringable|null $id */
             $id = $entity->getId();
 
             return null !== $id ? (string) $id : null;

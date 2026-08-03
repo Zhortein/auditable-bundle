@@ -17,6 +17,7 @@ final class AuditEntry
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER)]
+    /** @phpstan-ignore property.unusedType (assigned by Doctrine) */
     private ?int $id = null;
 
     #[ORM\Column(name: 'occurred_at', type: Types::DATETIME_IMMUTABLE)]

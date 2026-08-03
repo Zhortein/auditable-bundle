@@ -17,6 +17,7 @@ final readonly class DoctrineAuditStorage implements AuditStorageInterface
 
     public function persist(object $entry): void
     {
+        /* @phpstan-ignore-next-line instanceof.alwaysTrue (runtime generic validation) */
         if (!$entry instanceof ApplicationAuditEntry) {
             throw new \InvalidArgumentException('DoctrineAuditStorage accepts only ApplicationAuditEntry instances.');
         }

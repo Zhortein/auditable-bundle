@@ -19,6 +19,15 @@ final class ZhorteinAuditableExtension extends Extension
     public function load(array $configs, ContainerBuilder $container): void
     {
         $configuration = new Configuration();
+        /** @var array{
+         *     enabled: bool,
+         *     legacy_mapping: array{enabled: bool},
+         *     transactional: array{enabled: bool},
+         *     async: array{enabled: bool, transport: string},
+         *     listener: array{track_insert: bool, track_update: bool, track_delete: bool},
+         *     fields: array{max_string_length: int, global_ignored: list<string>}
+         * } $config
+         */
         $config = $this->processConfiguration($configuration, $configs);
 
         $container->setParameter('zhortein_auditable.enabled', (bool) $config['enabled']);

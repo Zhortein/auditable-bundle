@@ -13,6 +13,7 @@ final class NonAuditableEntity
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    /** @phpstan-ignore property.unusedType (assigned by Doctrine) */
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]

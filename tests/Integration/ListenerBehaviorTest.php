@@ -160,6 +160,7 @@ final class ListenerBehaviorTest extends TestCase
         bool $trackDelete = true,
     ): void {
         $resolver = new class implements ActorResolverInterface {
+            /** @phpstan-ignore return.unusedType (interface contract is nullable) */
             public function resolveActorId(): ?string
             {
                 return 'fixture-actor';

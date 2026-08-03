@@ -34,7 +34,7 @@ final class DoctrineTestFactory
         $connection = DriverManager::getConnection(['driver' => 'pdo_sqlite', 'memory' => true]);
         $configuration = ORMSetup::createAttributeMetadataConfiguration($paths, true);
 
-        if (\PHP_VERSION_ID >= 80400 && method_exists($configuration, 'enableNativeLazyObjects')) {
+        if (\PHP_VERSION_ID >= 80400) {
             $configuration->enableNativeLazyObjects(true);
         }
 

@@ -37,6 +37,7 @@ final readonly class SecurityActorResolver implements ActorResolverInterface
         }
 
         if (method_exists($user, 'getId')) {
+            /** @var scalar|\Stringable|null $id */
             $id = $user->getId();
 
             return null !== $id ? (string) $id : null;

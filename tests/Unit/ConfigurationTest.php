@@ -42,7 +42,6 @@ final class ConfigurationTest extends TestCase
         $config = $this->process(['transactional' => ['enabled' => true]]);
 
         self::assertSame(['enabled' => true], $config['transactional']);
-        self::assertTrue($config['transactional']['enabled']);
     }
 
     public function testTransactionalModeCanBeExplicitlyDisabled(): void
@@ -50,7 +49,6 @@ final class ConfigurationTest extends TestCase
         $config = $this->process(['transactional' => ['enabled' => false]]);
 
         self::assertSame(['enabled' => false], $config['transactional']);
-        self::assertFalse($config['transactional']['enabled']);
     }
 
     public function testTransactionalModeRejectsNonBooleanValues(): void
@@ -99,6 +97,10 @@ final class ConfigurationTest extends TestCase
      */
     private function process(array $config): array
     {
-        return (new Processor())->processConfiguration(new Configuration(), [$config]);
+        $processed = (new Processor())->processConfiguration(new Configuration(), [$config]);
+        /** @var array<string, mixed> $typedProcessed */
+        $typedProcessed = $processed;
+
+        return $typedProcessed;
     }
 }

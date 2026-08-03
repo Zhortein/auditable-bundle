@@ -51,7 +51,9 @@ final class ContainerTest extends TestCase
         self::assertFalse($container->getDefinition(AuditableDoctrineListener::class)->isPublic());
 
         self::assertTrue($container->getParameter('zhortein_auditable.enabled'));
-        self::assertSame($config['async']['enabled'] ?? true, $container->getParameter('zhortein_auditable.async.enabled'));
+        $async = $config['async'] ?? [];
+        self::assertIsArray($async);
+        self::assertSame($async['enabled'] ?? true, $container->getParameter('zhortein_auditable.async.enabled'));
         self::assertSame('async', $container->getParameter('zhortein_auditable.async.transport'));
         self::assertTrue($container->getParameter('zhortein_auditable.listener.track_insert'));
         self::assertTrue($container->getParameter('zhortein_auditable.listener.track_update'));

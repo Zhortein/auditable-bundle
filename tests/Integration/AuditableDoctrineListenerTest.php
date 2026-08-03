@@ -61,7 +61,9 @@ final class AuditableDoctrineListenerTest extends TestCase
         self::assertNull($provider->getFor($entity));
         self::assertNull($provider->getFor($entity));
         $cache = new \ReflectionProperty($provider, 'cache');
-        self::assertArrayHasKey(NonAuditableTestEntity::class, $cache->getValue($provider));
+        $cacheValue = $cache->getValue($provider);
+        self::assertIsArray($cacheValue);
+        self::assertArrayHasKey(NonAuditableTestEntity::class, $cacheValue);
     }
 }
 

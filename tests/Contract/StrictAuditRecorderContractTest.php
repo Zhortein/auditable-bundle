@@ -61,8 +61,12 @@ final class StrictAuditRecorderContractTest extends TestCase
     {
         $composer = json_decode((string) file_get_contents(\dirname(__DIR__, 2).'/composer.json'), true, flags: \JSON_THROW_ON_ERROR);
         self::assertIsArray($composer);
-        self::assertSame('^1.0', $composer['require']['psr/clock'] ?? null);
-        self::assertArrayNotHasKey('symfony/clock', $composer['require']);
-        self::assertArrayNotHasKey('symfony/clock', $composer['require-dev']);
+        $require = $composer['require'] ?? null;
+        $requireDev = $composer['require-dev'] ?? null;
+        self::assertIsArray($require);
+        self::assertIsArray($requireDev);
+        self::assertSame('^1.0', $require['psr/clock'] ?? null);
+        self::assertArrayNotHasKey('symfony/clock', $require);
+        self::assertArrayNotHasKey('symfony/clock', $requireDev);
     }
 }
