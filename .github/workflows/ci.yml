@@ -77,7 +77,7 @@ jobs:
           - name: PHP 8.5 / Symfony 8.x latest / DBundle 3 / ORM 3 / latest
             php: "8.5"
             symfony: "8.*"
-            symfony_resolved: "8.1.*"
+            symfony_resolved: "8.*"
             doctrine_bundle: "3"
             doctrine_bundle_major: "3"
             doctrine_orm: "3"
@@ -137,7 +137,7 @@ jobs:
             doctrine_persistence: "4"
           - name: Symfony 8.x / ORM 3 latest
             symfony: "8.*"
-            symfony_resolved: "8.0.*"
+            symfony_resolved: "8.*"
             doctrine_bundle: "3"
             doctrine_orm: "3"
             doctrine_dbal: "4"
@@ -186,7 +186,7 @@ jobs:
           - name: PHP 8.5 / Symfony 8.x / DBundle 3 / ORM 3 / latest
             php: "8.5"
             symfony: "8.*"
-            symfony_resolved: "8.1.*"
+            symfony_resolved: "8.*"
             doctrine_bundle: "3"
             doctrine_bundle_major: "3"
             doctrine_orm: "3"
