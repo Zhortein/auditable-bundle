@@ -39,6 +39,8 @@ return static function (ContainerConfigurator $container): void {
             __DIR__ . '/../src/Transactional/Contract/',
             __DIR__ . '/../src/Transactional/Exception/',
             __DIR__ . '/../src/Transactional/Model/',
+            // Manually composable until factory, storage and opt-in wiring are introduced.
+            __DIR__ . '/../src/Transactional/Service/StrictAuditRecorder.php',
         ]);
 
     $services->alias(IdentifierExtractorInterface::class, DoctrineIdentifierExtractor::class);

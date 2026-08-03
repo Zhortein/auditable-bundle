@@ -14,6 +14,7 @@
 - Add immutable transactional audit contracts and data-transfer objects without changing the legacy runtime behavior.
 - Add a default Doctrine ORM identifier extractor for deterministic scalar, Stringable and primitive composite audit subjects.
 - Add a default Symfony Security actor resolver for authenticated users and immediate SwitchUserToken impersonation context.
+- Add a manually composable strict transactional recorder that resolves audit subjects, actors and timestamps before delegating to application-supplied entry factories and storage.
 
 ## [1.0.0] - 2025-12-24
 

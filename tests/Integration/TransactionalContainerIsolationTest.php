@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Tools\SchemaTool;
 use PHPUnit\Framework\TestCase;
+use Psr\Clock\ClockInterface;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -30,6 +31,7 @@ use Zhortein\AuditableBundle\Transactional\Model\AuditEvent;
 use Zhortein\AuditableBundle\Transactional\Model\AuditRecord;
 use Zhortein\AuditableBundle\Transactional\Model\AuditSubject;
 use Zhortein\AuditableBundle\Transactional\Service\DoctrineIdentifierExtractor;
+use Zhortein\AuditableBundle\Transactional\Service\StrictAuditRecorder;
 use Zhortein\AuditableBundle\Transactional\Service\SymfonySecurityActorResolver;
 
 final class TransactionalContainerIsolationTest extends TestCase
@@ -57,6 +59,8 @@ final class TransactionalContainerIsolationTest extends TestCase
             self::assertFalse($container->has(IdentifierExtractorInterface::class));
             self::assertFalse($container->has(DoctrineIdentifierExtractor::class));
             self::assertFalse($container->has(SymfonySecurityActorResolver::class));
+            self::assertTrue(class_exists(StrictAuditRecorder::class));
+            self::assertFalse($container->has(StrictAuditRecorder::class));
             self::assertTrue(class_exists(ActorResolutionException::class));
             self::assertFalse($container->has(ActorResolutionException::class));
             self::assertTrue(class_exists(IdentifierExtractionException::class));
@@ -114,6 +118,10 @@ final class TransactionalContainerIsolationTest extends TestCase
         foreach ([AuditRecorderInterface::class, AuditEntryFactoryInterface::class, AuditStorageInterface::class] as $contract) {
             self::assertFalse($container->hasAlias($contract));
         }
+        self::assertTrue($container->hasDefinition(StrictAuditRecorder::class));
+        self::assertTrue($container->getDefinition(StrictAuditRecorder::class)->isAbstract());
+        self::assertTrue($container->getDefinition(StrictAuditRecorder::class)->hasTag('container.excluded'));
+        self::assertFalse($container->hasAlias(ClockInterface::class));
     }
 
     /** @param list<ClassMetadata<object>> $metadata
