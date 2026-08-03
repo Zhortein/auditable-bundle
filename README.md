@@ -1,29 +1,20 @@
 # Zhortein Auditable Bundle
 
-A lightweight Symfony bundle to automatically **audit and historize Doctrine ORM entity changes** (create/update/delete) with optional **async persistence** via Symfony Messenger.
+Zhortein Auditable Bundle provides two audit paths for Symfony applications using Doctrine ORM:
 
-> Designed for Symfony 7.4+ / 8.x, PHP 8.3+.
-
-## Features
-
-- ✅ Opt-in auditing with PHP Attributes:
-  - `#[Audited]` on a Doctrine entity class to enable auditing
-  - `#[AuditLabel('…')]` on an entity class to override the displayed label
-  - `#[AuditIgnore]` on an entity property to exclude it from audits (PII/secrets/noise)
-- ✅ Captures create / update / delete actions
-- ✅ Stores audit records in a `History` entity (Doctrine ORM)
-- ✅ Supports async writing using Symfony Messenger (recommended)
-- ✅ Extensible: actor resolver, label strategy, change detector, writer…
+- the compatibility-preserved legacy listener, which records selected entity changes automatically;
+- an opt-in strict recorder that lets the application own its audit model, persistence and transaction boundary.
 
 ## Requirements
 
-- PHP 8.3+
+- PHP 8.3 or later
 - Symfony 7.4 or 8.x
 - Doctrine ORM 3.x
 - DoctrineBundle 2.19 or 3.x
-- Symfony Messenger (optional but recommended for async)
 
-The bundle includes `symfony/polyfill-mbstring`, so the native `mbstring` extension is not required. Installing the native extension remains recommended for the best multibyte string performance.
+Symfony Messenger is a required package dependency and supports the legacy asynchronous writer. The bundle includes `symfony/polyfill-mbstring`; the native `mbstring` extension remains recommended for performance.
+
+See the [compatibility and deprecation policy](docs/compatibility.md) and the [2.0 upgrade guide](UPGRADE-2.0.md) before upgrading an existing application.
 
 ## Installation
 
@@ -31,42 +22,38 @@ The bundle includes `symfony/polyfill-mbstring`, so the native `mbstring` extens
 composer require zhortein/auditable-bundle
 ```
 
-If you **don’t** use Symfony Flex recipes, enable the bundle:
+Without Symfony Flex recipes, enable the bundle in `config/bundles.php`:
 
 ```php
-// config/bundles.php
 return [
     // ...
     Zhortein\AuditableBundle\ZhorteinAuditableBundle::class => ['all' => true],
 ];
 ```
 
-### Doctrine mapping & migrations
+With no bundle configuration, the legacy runtime and its `AuditEntry` mapping remain enabled and the transactional recorder remains disabled. The bundle does not apply migrations automatically. Review any Doctrine migration generated for your application before running it.
 
-The bundle ships a Doctrine entity (`AuditEntry`). Its mapping is registered automatically by a compiler pass, so you **don't need** to declare a `doctrine.orm.mappings` entry manually.
+## Choose an audit path
 
-**Generate and run migrations** after installation:
+The [legacy mode](docs/legacy-mode.md) preserves the 1.0 behavior for existing applications. It is convenient for automatic create, update and delete histories, but is fail-open, flushes through its persister and does not guarantee atomicity with the business write.
 
-```bash
-php bin/console doctrine:migrations:diff
-php bin/console doctrine:migrations:migrate
-```
+The [transactional Doctrine integration](docs/transactional-doctrine.md) is opt-in. It is intended for operations where an audit failure must prevent the business commit. The application supplies its own audit entity, factory, storage and clock; the bundle supplies no default persistence model for this path.
 
-This creates the `audit_entry` table with the necessary schema for storing audit trail entries.
+Both paths can coexist during a migration. The [2.0 upgrade guide](UPGRADE-2.0.md) covers coexistence, transactional-only applications and rollback planning.
 
-## Quick start
+## Legacy quick start
 
-### 1) Mark entities as audited
+Mark an entity with the actual legacy attributes:
 
 ```php
-use Zhortein\AuditableBundle\Attribute\Audited;
-use Zhortein\AuditableBundle\Attribute\AuditLabel;
+use Zhortein\AuditableBundle\Attribute\Auditable;
+use Zhortein\AuditableBundle\Attribute\AuditField;
 use Zhortein\AuditableBundle\Attribute\AuditIgnore;
 
-#[Audited]
-#[AuditLabel('Customer')]
-class Customer
+#[Auditable(label: 'Customer')]
+final class Customer
 {
+    #[AuditField(label: 'Email address')]
     private string $email;
 
     #[AuditIgnore]
@@ -74,92 +61,37 @@ class Customer
 }
 ```
 
-### 2) (Recommended) Configure async message handling
-
-By default, the bundle is configured for **async persistence** via Symfony Messenger.
-
-#### Step A: Define the Messenger transport
-
-If your project doesn't already have a Messenger `async` transport, add one:
+The defaults are:
 
 ```yaml
-# config/packages/messenger.yaml
-framework:
-  messenger:
-    transports:
-      async: '%env(MESSENGER_TRANSPORT_DSN)%'
-    routing:
-      'Zhortein\AuditableBundle\Message\PersistAuditEntryMessage': async
-```
-
-See `config/packages/messenger.yaml.example` in the bundle for a complete configuration example.
-
-#### Step B: Configure the bundle
-
-Create or update the bundle configuration:
-
-```yaml
-# config/packages/zhortein_auditable.yaml
 zhortein_auditable:
   enabled: true
+  legacy_mapping:
+    enabled: true
+  transactional:
+    enabled: false
   async:
     enabled: true
-    transport: 'async'
+    transport: async
 ```
 
-See `config/packages/zhortein_auditable.yaml.example` in the bundle for all available options.
+When `async.enabled` is `true`, route `Zhortein\AuditableBundle\Message\PersistAuditEntryMessage` through Symfony Messenger. The historical `async.transport` key is preserved for compatibility; Messenger routing determines the effective transport. Set `async.enabled: false` to use the synchronous legacy writer.
 
-#### Synchronous mode (optional)
+The complete options and historical limitations are documented in [Legacy mode](docs/legacy-mode.md). A commented example is available at `config/packages/zhortein_auditable.yaml.example`.
 
-If you prefer **synchronous persistence** (audit records written immediately without Messenger):
+## Transactional quick start
 
-```yaml
-zhortein_auditable:
-  enabled: true
-  async:
-    enabled: false
-```
-
-> **Note**: Async mode is recommended for production to avoid blocking request handling with database writes.
-
-## Configuration reference
-
-The bundle's configuration options are documented with comments in `config/packages/zhortein_auditable.yaml.example`.
-
-**Key settings:**
-
-- **`enabled`**: Master switch to enable/disable auditing globally (default: `true`)
-- **`legacy_mapping.enabled`**: Register the legacy `AuditEntry` Doctrine mapping (default: `true`)
-- **`async.enabled`**: Use Messenger for async persistence (default: `true`)
-- **`async.transport`**: Messenger transport name for audit messages (default: `'async'`)
-- **`listener.track_insert/update/delete`**: Control which operations are tracked (all default to `true`)
-- **`fields.max_string_length`**: Maximum length for serialized field values (default: `180`)
-- **`fields.global_ignored`**: List of properties to always exclude from all entities (default: `[]`)
-
-**Actor resolution:**
-
-By default, the bundle uses Symfony Security to resolve the current user via `SecurityActorResolver`. No additional configuration is needed.
-
-The resolver automatically handles:
-- Regular authenticated users → stores user ID or user identifier
-- Null users (not authenticated) → stores `null`
-- Impersonation → stores both original user and impersonator IDs
-
-### Opt-in transactional recorder wiring
-
-The strict transactional recorder is disabled by default. Enable its Symfony container wiring explicitly:
+Enable the recorder explicitly:
 
 ```yaml
-# config/packages/zhortein_auditable.yaml
 zhortein_auditable:
   transactional:
     enabled: true
 ```
 
-The application must provide the entry factory, storage and PSR-20 clock through standard Symfony aliases:
+Provide application services through standard Symfony aliases:
 
 ```yaml
-# config/services.yaml
 services:
   App\Audit\AuditEntryFactory: ~
   App\Audit\AuditStorage: ~
@@ -175,71 +107,60 @@ services:
     alias: App\Audit\AuditClock
 ```
 
-The bundle supplies the Doctrine identifier extractor and Symfony Security actor resolver by default. Applications can replace their `IdentifierExtractorInterface` and `AuditActorResolverInterface` aliases using standard Symfony service configuration.
+The bundle provides default aliases for `IdentifierExtractorInterface` and `AuditActorResolverInterface`; the application may replace either alias. It intentionally provides no entry factory, storage or clock.
 
-No entry factory, storage or clock implementation is supplied by default, and activation fails during container compilation if one is missing. The recorder performs no flush or commit and does not manage transactions. With `transactional.enabled: false`, the legacy behavior and its existing services remain unchanged.
-
-For Doctrine applications, keep the business mutation and audit entry in the same application-owned Unit of Work:
+Keep the mutation and audit entry in the same application-owned Unit of Work:
 
 ```php
 $entityManager->wrapInTransaction(function (EntityManagerInterface $entityManager) use ($operation, $auditRecorder): void {
     $operation->complete();
     $entityManager->persist($operation);
-    $auditRecorder->record(new AuditEvent(action: 'complete', title: 'Operation completed', entity: $operation));
+
+    $auditRecorder->record(new AuditEvent(
+        action: 'complete',
+        title: 'Operation completed',
+        entity: $operation,
+    ));
 });
 ```
 
-No Doctrine audit storage or audit entity is provided by the bundle; the mapping and persistence strategy remain application choices. See the [transactional Doctrine guide](docs/transactional-doctrine.md) for the full boundary rules and executable PostgreSQL example.
+The strict recorder performs no flush, commit or rollback and does not catch factory or storage exceptions. Fail-closed behavior therefore requires the audit storage to use the same entity manager and connection and not to flush independently. The application controls the transaction boundary.
 
-### Transactional-only applications
+No Doctrine audit entity, storage or migration is imposed by the bundle. The executable PostgreSQL proof and full boundary rules are in the [transactional Doctrine guide](docs/transactional-doctrine.md).
 
-Applications that no longer use any legacy audit path can opt out of the bundle's historical `AuditEntry` mapping:
+## Transactional-only applications
+
+After all legacy producers, pending Messenger messages and legacy workers have been dealt with, an application may omit the legacy mapping:
 
 ```yaml
 zhortein_auditable:
   enabled: false
-
   legacy_mapping:
     enabled: false
-
   transactional:
     enabled: true
 ```
 
-`enabled` controls the legacy runtime, `legacy_mapping.enabled` controls only Doctrine's knowledge of the legacy `AuditEntry`, and `transactional.enabled` controls only the strict recorder. Their defaults are respectively `true`, `true` and `false`, so existing applications without this configuration are unchanged. Disabling the mapping while the legacy runtime remains enabled is rejected.
+`enabled` controls the legacy runtime, `legacy_mapping.enabled` controls only Doctrine registration of the legacy `AuditEntry`, and `transactional.enabled` controls the strict recorder. Their defaults are `true`, `true` and `false`. Disabling the mapping while legacy auditing remains enabled is rejected.
 
-The opt-out does not delete an existing `audit_entry` table or provide a migration. Before enabling it in an application that used asynchronous legacy auditing, stop producing legacy messages, drain pending `PersistAuditEntryMessage` messages and ensure no legacy worker still writes them. See [Transactional-only mapping](docs/transactional-doctrine.md#transactional-only-mapping) for transition and migration guidance.
+This option never drops an existing `audit_entry` table and supplies no migration. See the [upgrade guide](UPGRADE-2.0.md#transactional-only-mode) before opting out.
 
-## What gets stored
+## Security and non-guarantees
 
-Each `AuditEntry` record in the audit trail contains:
+Never audit passwords, tokens, private keys or other secrets. Use `#[AuditIgnore]`, `fields.global_ignored` and application-level factory/storage validation to minimize recorded data. Actor identifiers and audit payloads may be personal data.
 
-- **Entity metadata**: Fully qualified class name and entity ID
-- **Action**: One of `create`, `update`, `delete`, or `log`
-- **Level**: Severity level (`debug`, `info`, `warning`, `error`, `critical`)
-- **Title & Description**: Human-readable summary of the change
-- **Context**: Optional context tag for grouping related entities
-- **Actor**: User ID or identifier of who made the change (null if unauthenticated)
-- **Impersonator**: Original user ID if the change was made during impersonation
-- **Timestamp**: When the change occurred (as `DateTimeImmutable`)
-- **Data**: JSON-encoded field changes (old value → new value), excluding `#[AuditIgnore]` properties
+The bundle does not provide encryption at rest, cryptographic signatures, hash chaining, append-only storage, retention, purge, anonymization or legal compliance. Strict transactional recording provides a fail-closed transaction boundary when integrated correctly; it does not provide tamper evidence. See [Security and privacy](docs/security-privacy.md).
 
-**Example audit entry for an update:**
-```
-Title: "Update [Customer] - 2 field(s) changed"
-Description: 
-  - "Email: john@example.com → john.doe@example.com"
-  - "Phone: +1234567890 → +1987654321"
-Data: { "email": { "old": "john@example.com", "new": "john.doe@example.com" }, ... }
-```
+## Documentation
 
-## Security / PII
-
-This bundle is meant to help you build **auditable applications**—but you are responsible for what you store.
-
-- Use `#[AuditIgnore]` for secrets (password hashes, tokens) and sensitive data that should not be persisted in audit logs.
-- Consider encrypting audit payloads or restricting access to the History table depending on your domain constraints.
+- [Documentation index](docs/index.md)
+- [Legacy mode](docs/legacy-mode.md)
+- [Transactional Doctrine integration](docs/transactional-doctrine.md)
+- [Upgrade from 1.0 to 2.0](UPGRADE-2.0.md)
+- [Security and privacy](docs/security-privacy.md)
+- [Compatibility and deprecation](docs/compatibility.md)
+- [Changelog](CHANGELOG.md)
 
 ## License
 
-MIT (see [LICENSE](LICENSE)]).
+MIT. See [LICENSE](LICENSE).
