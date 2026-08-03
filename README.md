@@ -178,6 +178,18 @@ The bundle supplies the Doctrine identifier extractor and Symfony Security actor
 
 No entry factory, storage or clock implementation is supplied by default, and activation fails during container compilation if one is missing. The recorder performs no flush or commit and does not manage transactions. With `transactional.enabled: false`, the legacy behavior and its existing services remain unchanged.
 
+For Doctrine applications, keep the business mutation and audit entry in the same application-owned Unit of Work:
+
+```php
+$entityManager->wrapInTransaction(function (EntityManagerInterface $entityManager) use ($operation, $auditRecorder): void {
+    $operation->complete();
+    $entityManager->persist($operation);
+    $auditRecorder->record(new AuditEvent(action: 'complete', title: 'Operation completed', entity: $operation));
+});
+```
+
+No Doctrine audit storage or audit entity is provided by the bundle; the mapping and persistence strategy remain application choices. See the [transactional Doctrine guide](docs/transactional-doctrine.md) for the full boundary rules and executable PostgreSQL example.
+
 ## What gets stored
 
 Each `AuditEntry` record in the audit trail contains:
