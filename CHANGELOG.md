@@ -13,6 +13,7 @@
 - Direct runtime dependency on symfony/polyfill-mbstring, allowing the bundle to run without the native mbstring extension.
 - Add immutable transactional audit contracts and data-transfer objects without changing the legacy runtime behavior.
 - Add a default Doctrine ORM identifier extractor for deterministic scalar, Stringable and primitive composite audit subjects.
+- Add a default Symfony Security actor resolver for authenticated users and immediate SwitchUserToken impersonation context.
 
 ## [1.0.0] - 2025-12-24
 

@@ -23,12 +23,14 @@ use Zhortein\AuditableBundle\Transactional\Contract\AuditEntryFactoryInterface;
 use Zhortein\AuditableBundle\Transactional\Contract\AuditRecorderInterface;
 use Zhortein\AuditableBundle\Transactional\Contract\AuditStorageInterface;
 use Zhortein\AuditableBundle\Transactional\Contract\IdentifierExtractorInterface;
+use Zhortein\AuditableBundle\Transactional\Exception\ActorResolutionException;
 use Zhortein\AuditableBundle\Transactional\Exception\IdentifierExtractionException;
 use Zhortein\AuditableBundle\Transactional\Model\AuditActor;
 use Zhortein\AuditableBundle\Transactional\Model\AuditEvent;
 use Zhortein\AuditableBundle\Transactional\Model\AuditRecord;
 use Zhortein\AuditableBundle\Transactional\Model\AuditSubject;
 use Zhortein\AuditableBundle\Transactional\Service\DoctrineIdentifierExtractor;
+use Zhortein\AuditableBundle\Transactional\Service\SymfonySecurityActorResolver;
 
 final class TransactionalContainerIsolationTest extends TestCase
 {
@@ -47,13 +49,16 @@ final class TransactionalContainerIsolationTest extends TestCase
                 self::assertTrue(class_exists($model));
                 self::assertFalse($container->has($model));
             }
-            foreach ([AuditRecorderInterface::class, AuditActorResolverInterface::class, AuditEntryFactoryInterface::class, AuditStorageInterface::class] as $contract) {
+            foreach ([AuditRecorderInterface::class, AuditEntryFactoryInterface::class, AuditStorageInterface::class] as $contract) {
                 self::assertTrue(interface_exists($contract));
                 self::assertFalse($container->has($contract));
             }
             self::assertTrue(interface_exists(IdentifierExtractorInterface::class));
             self::assertFalse($container->has(IdentifierExtractorInterface::class));
             self::assertFalse($container->has(DoctrineIdentifierExtractor::class));
+            self::assertFalse($container->has(SymfonySecurityActorResolver::class));
+            self::assertTrue(class_exists(ActorResolutionException::class));
+            self::assertFalse($container->has(ActorResolutionException::class));
             self::assertTrue(class_exists(IdentifierExtractionException::class));
             self::assertFalse($container->has(IdentifierExtractionException::class));
 
@@ -102,7 +107,11 @@ final class TransactionalContainerIsolationTest extends TestCase
         self::assertFalse($container->getAlias(IdentifierExtractorInterface::class)->isPublic());
         self::assertTrue($container->hasDefinition(DoctrineIdentifierExtractor::class));
         self::assertFalse($container->getDefinition(DoctrineIdentifierExtractor::class)->isPublic());
-        foreach ([AuditRecorderInterface::class, AuditActorResolverInterface::class, AuditEntryFactoryInterface::class, AuditStorageInterface::class] as $contract) {
+        self::assertSame(SymfonySecurityActorResolver::class, (string) $container->getAlias(AuditActorResolverInterface::class));
+        self::assertFalse($container->getAlias(AuditActorResolverInterface::class)->isPublic());
+        self::assertTrue($container->hasDefinition(SymfonySecurityActorResolver::class));
+        self::assertFalse($container->getDefinition(SymfonySecurityActorResolver::class)->isPublic());
+        foreach ([AuditRecorderInterface::class, AuditEntryFactoryInterface::class, AuditStorageInterface::class] as $contract) {
             self::assertFalse($container->hasAlias($contract));
         }
     }

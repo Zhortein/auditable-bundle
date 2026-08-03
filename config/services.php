@@ -13,8 +13,10 @@ use Zhortein\AuditableBundle\Service\ChangeDetector;
 use Zhortein\AuditableBundle\Service\Historizer;
 use Zhortein\AuditableBundle\Service\SecurityActorResolver;
 use Zhortein\AuditableBundle\Service\SyncAuditEntryWriter;
+use Zhortein\AuditableBundle\Transactional\Contract\AuditActorResolverInterface;
 use Zhortein\AuditableBundle\Transactional\Contract\IdentifierExtractorInterface;
 use Zhortein\AuditableBundle\Transactional\Service\DoctrineIdentifierExtractor;
+use Zhortein\AuditableBundle\Transactional\Service\SymfonySecurityActorResolver;
 
 use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
 
@@ -40,6 +42,7 @@ return static function (ContainerConfigurator $container): void {
         ]);
 
     $services->alias(IdentifierExtractorInterface::class, DoctrineIdentifierExtractor::class);
+    $services->alias(AuditActorResolverInterface::class, SymfonySecurityActorResolver::class);
 
     $services->set(AuditableMetadataProvider::class);
 
