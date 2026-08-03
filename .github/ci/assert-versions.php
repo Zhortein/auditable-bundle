@@ -39,6 +39,26 @@ foreach ($packages as $package) {
     printf("%s: %s\n", $package, InstalledVersions::getPrettyVersion($package) ?? 'unknown');
 }
 
+$expectedPhpStanMajor = getenv('EXPECT_PHPSTAN_MAJOR');
+if (false !== $expectedPhpStanMajor && '' !== $expectedPhpStanMajor) {
+    if (!ctype_digit($expectedPhpStanMajor)) {
+        fwrite(STDERR, "EXPECT_PHPSTAN_MAJOR must be a positive integer.\n");
+
+        exit(2);
+    }
+
+    $assertedPhpStanVersion = InstalledVersions::getVersion('phpstan/phpstan');
+    if (null === $assertedPhpStanVersion || !str_starts_with(ltrim($assertedPhpStanVersion, 'v'), $expectedPhpStanMajor.'.')) {
+        fwrite(STDERR, sprintf(
+            "Expected phpstan/phpstan %s.x, resolved %s.\n",
+            $expectedPhpStanMajor,
+            InstalledVersions::getPrettyVersion('phpstan/phpstan') ?? 'unknown',
+        ));
+
+        exit(1);
+    }
+}
+
 if (!InstalledVersions::isInstalled('symfony/polyfill-mbstring')) {
     fwrite(STDERR, "symfony/polyfill-mbstring is not installed.\n");
 

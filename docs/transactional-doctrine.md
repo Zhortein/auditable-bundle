@@ -48,7 +48,7 @@ The recorder does not catch factory or storage errors. Doctrine controls flush a
 
 After a flush or transaction error, abandon the entity manager according to Doctrine's transaction practices rather than attempting to reuse a potentially inconsistent Unit of Work. Never keep a database transaction open during user interaction or across HTTP requests.
 
-The executable PostgreSQL fixtures in [`tests/Fixtures/Transactional/PostgreSql`](../tests/Fixtures/Transactional/PostgreSql) and [`TransactionalAtomicityIntegrationTest`](../tests/Integration/PostgreSql/TransactionalAtomicityIntegrationTest.php) demonstrate shared commit, shared rollback and fail-closed behavior with application-owned UUID v7 entities.
+The executable PostgreSQL fixtures in [`tests/Fixtures/Transactional/PostgreSql`](https://github.com/Zhortein/auditable-bundle/tree/main/tests/Fixtures/Transactional/PostgreSql) and [`TransactionalAtomicityIntegrationTest`](https://github.com/Zhortein/auditable-bundle/blob/main/tests/Integration/PostgreSql/TransactionalAtomicityIntegrationTest.php) demonstrate shared commit, shared rollback and fail-closed behavior with application-owned UUID v7 entities.
 
 ## Transactional-only mapping
 

@@ -109,4 +109,4 @@ $em->flush();
 
 - See [README.md](../README.md) for installation and configuration
 - Review source code documentation in `/src` for detailed API information
-- Check [tests](../tests) for integration examples
+- Check the [tests on GitHub](https://github.com/Zhortein/auditable-bundle/tree/main/tests) for integration examples

@@ -130,12 +130,18 @@ jobs:
         include:
           - name: Symfony 7.4 / ORM 3 latest
             symfony: "7.4.*"
+            symfony_resolved: "7.4.*"
             doctrine_bundle: "3"
             doctrine_orm: "3"
+            doctrine_dbal: "4"
+            doctrine_persistence: "4"
           - name: Symfony 8.x / ORM 3 latest
             symfony: "8.*"
+            symfony_resolved: "8.0.*"
             doctrine_bundle: "3"
             doctrine_orm: "3"
+            doctrine_dbal: "4"
+            doctrine_persistence: "4"
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
@@ -153,7 +159,12 @@ jobs:
           SYMFONY_REQUIRE: "${{ matrix.symfony }}"
         run: composer update --prefer-dist --no-interaction --no-progress --with "doctrine/doctrine-bundle:^${{ matrix.doctrine_bundle }}.0" --with "doctrine/orm:^${{ matrix.doctrine_orm }}.0"
       - run: composer validate --strict
-      - run: composer phpstan -- --memory-limit=512M
+      - name: Assert PHPStan and resolved versions
+        env:
+          EXPECT_NATIVE_MBSTRING: "true"
+          EXPECT_PHPSTAN_MAJOR: "2"
+        run: php .github/ci/assert-versions.php "8.4" "${{ matrix.symfony_resolved }}" "${{ matrix.doctrine_bundle }}" "${{ matrix.doctrine_orm }}" "${{ matrix.doctrine_dbal }}" "${{ matrix.doctrine_persistence }}"
+      - run: composer phpstan -- --memory-limit=1G
 
   transactional-postgresql:
     name: Transactional PostgreSQL / ${{ matrix.name }}
@@ -224,6 +235,58 @@ jobs:
       - run: composer show --direct symfony/uid
       - run: composer why symfony/uid
       - run: composer test:postgresql
+
+  package-distribution:
+    name: Package distribution
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, iconv, dom, xml, zip
+          tools: composer:v2
+          coverage: none
+      - run: composer validate --strict
+      - name: Build and inspect Composer archive
+        run: |
+          mkdir -p /tmp/auditable-package
+          composer archive --format=zip --dir=/tmp/auditable-package --file=auditable-bundle
+          php .github/ci/check-package-archive.php /tmp/auditable-package/auditable-bundle.zip
+      - name: Install the distributed package without development dependencies
+        run: |
+          mkdir -p /tmp/auditable-package/extracted
+          unzip -q /tmp/auditable-package/auditable-bundle.zip -d /tmp/auditable-package/extracted
+          package_root=/tmp/auditable-package/extracted
+          if [[ ! -f "${package_root}/composer.json" ]]; then
+            package_root="$(find "${package_root}" -mindepth 1 -maxdepth 1 -type d -print -quit)"
+          fi
+          cd "${package_root}"
+          composer install --no-dev --prefer-dist --no-interaction --no-progress
+          composer validate --strict
+          composer check-platform-reqs
+          # The single-quoted program is evaluated by PHP.
+          # shellcheck disable=SC2016
+          php -r '
+          require "vendor/autoload.php";
+          foreach ([
+              Zhortein\AuditableBundle\ZhorteinAuditableBundle::class,
+              Zhortein\AuditableBundle\Transactional\Model\AuditEvent::class,
+              Zhortein\AuditableBundle\Transactional\Contract\AuditRecorderInterface::class,
+              Zhortein\AuditableBundle\Transactional\Service\StrictAuditRecorder::class,
+              Zhortein\AuditableBundle\Transactional\Service\DoctrineIdentifierExtractor::class,
+              Zhortein\AuditableBundle\Transactional\Service\SymfonySecurityActorResolver::class,
+          ] as $type) {
+              if (!class_exists($type) && !interface_exists($type)) {
+                  fwrite(STDERR, "Unable to autoload ".$type.PHP_EOL);
+                  exit(1);
+              }
+              echo "Autoloaded ".$type.PHP_EOL;
+          }
+          '
 
   coding-style:
     name: Coding style
