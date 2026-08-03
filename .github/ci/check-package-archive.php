@@ -74,7 +74,11 @@ try {
         'README.md',
         'CHANGELOG.md',
         'LICENSE',
+        'UPGRADE-2.0.md',
+        'docs/compatibility.md',
         'docs/index.md',
+        'docs/legacy-mode.md',
+        'docs/security-privacy.md',
         'docs/transactional-doctrine.md',
     ];
     foreach ($requiredFiles as $requiredFile) {
@@ -147,7 +151,11 @@ try {
         return implode('/', $segments);
     };
 
-    $markdownFiles = ['README.md', 'docs/index.md', 'docs/transactional-doctrine.md'];
+    $markdownFiles = array_values(array_filter(
+        $relativeEntries,
+        static fn (string $entry): bool => str_ends_with(strtolower($entry), '.md'),
+    ));
+    sort($markdownFiles);
     $validatedLinks = 0;
     foreach ($markdownFiles as $markdownFile) {
         $contents = $archive->getFromName($rootPrefix.$markdownFile);
