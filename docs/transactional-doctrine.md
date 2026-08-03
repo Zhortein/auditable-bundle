@@ -49,3 +49,39 @@ The recorder does not catch factory or storage errors. Doctrine controls flush a
 After a flush or transaction error, abandon the entity manager according to Doctrine's transaction practices rather than attempting to reuse a potentially inconsistent Unit of Work. Never keep a database transaction open during user interaction or across HTTP requests.
 
 The executable PostgreSQL fixtures in [`tests/Fixtures/Transactional/PostgreSql`](../tests/Fixtures/Transactional/PostgreSql) and [`TransactionalAtomicityIntegrationTest`](../tests/Integration/PostgreSql/TransactionalAtomicityIntegrationTest.php) demonstrate shared commit, shared rollback and fail-closed behavior with application-owned UUID v7 entities.
+
+## Transactional-only mapping
+
+During a transition, an application can keep the historical mapping while enabling the strict recorder:
+
+```yaml
+zhortein_auditable:
+  legacy_mapping:
+    enabled: true
+  transactional:
+    enabled: true
+```
+
+The legacy runtime may be enabled or disabled in this coexistence configuration, and Doctrine continues to know the bundle's `AuditEntry` entity.
+
+Once the application no longer uses any legacy audit path, it can retain only its application-owned transactional mapping:
+
+```yaml
+zhortein_auditable:
+  enabled: false
+  legacy_mapping:
+    enabled: false
+  transactional:
+    enabled: true
+```
+
+The opt-out is rejected unless `enabled` is also `false`. It only prevents registration of the bundle's legacy Doctrine mapping: it does not delete `audit_entry`, alter an existing schema or provide a migration. Historical data remains physically present until an application migration deliberately preserves, archives or changes it. Review any migration generated after removing the mapping before execution; the bundle does not recommend automatic deletion of audit history.
+
+Before disabling the mapping in an application that used asynchronous legacy auditing:
+
+1. Stop or disable production of legacy audits.
+2. Drain or process every pending `PersistAuditEntryMessage`.
+3. Verify that no legacy worker still writes `AuditEntry` records.
+4. Only then disable the mapping.
+
+A queued legacy message still depends on the legacy message handler, persister and `AuditEntry` mapping. The bundle does not drain queues automatically. The executable SQLite and PostgreSQL opt-out tests demonstrate that the strict recorder and application-owned audit schema continue to work without registering the legacy metadata.

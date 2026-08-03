@@ -129,6 +129,7 @@ The bundle's configuration options are documented with comments in `config/packa
 **Key settings:**
 
 - **`enabled`**: Master switch to enable/disable auditing globally (default: `true`)
+- **`legacy_mapping.enabled`**: Register the legacy `AuditEntry` Doctrine mapping (default: `true`)
 - **`async.enabled`**: Use Messenger for async persistence (default: `true`)
 - **`async.transport`**: Messenger transport name for audit messages (default: `'async'`)
 - **`listener.track_insert/update/delete`**: Control which operations are tracked (all default to `true`)
@@ -189,6 +190,25 @@ $entityManager->wrapInTransaction(function (EntityManagerInterface $entityManage
 ```
 
 No Doctrine audit storage or audit entity is provided by the bundle; the mapping and persistence strategy remain application choices. See the [transactional Doctrine guide](docs/transactional-doctrine.md) for the full boundary rules and executable PostgreSQL example.
+
+### Transactional-only applications
+
+Applications that no longer use any legacy audit path can opt out of the bundle's historical `AuditEntry` mapping:
+
+```yaml
+zhortein_auditable:
+  enabled: false
+
+  legacy_mapping:
+    enabled: false
+
+  transactional:
+    enabled: true
+```
+
+`enabled` controls the legacy runtime, `legacy_mapping.enabled` controls only Doctrine's knowledge of the legacy `AuditEntry`, and `transactional.enabled` controls only the strict recorder. Their defaults are respectively `true`, `true` and `false`, so existing applications without this configuration are unchanged. Disabling the mapping while the legacy runtime remains enabled is rejected.
+
+The opt-out does not delete an existing `audit_entry` table or provide a migration. Before enabling it in an application that used asynchronous legacy auditing, stop producing legacy messages, drain pending `PersistAuditEntryMessage` messages and ensure no legacy worker still writes them. See [Transactional-only mapping](docs/transactional-doctrine.md#transactional-only-mapping) for transition and migration guidance.
 
 ## What gets stored
 
