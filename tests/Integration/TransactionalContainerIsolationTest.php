@@ -118,10 +118,49 @@ final class TransactionalContainerIsolationTest extends TestCase
         foreach ([AuditRecorderInterface::class, AuditEntryFactoryInterface::class, AuditStorageInterface::class] as $contract) {
             self::assertFalse($container->hasAlias($contract));
         }
-        self::assertTrue($container->hasDefinition(StrictAuditRecorder::class));
-        self::assertTrue($container->getDefinition(StrictAuditRecorder::class)->isAbstract());
-        self::assertTrue($container->getDefinition(StrictAuditRecorder::class)->hasTag('container.excluded'));
+        self::assertFalse($container->hasDefinition(StrictAuditRecorder::class));
         self::assertFalse($container->hasAlias(ClockInterface::class));
+        self::assertNoTransactionalParameters($container);
+    }
+
+    public function testTransactionalRecorderDefinitionIsConditionalAndPrivateBeforeCompilation(): void
+    {
+        $container = new ContainerBuilder();
+        (new ZhorteinAuditableExtension())->load([['transactional' => ['enabled' => true]]], $container);
+
+        self::assertTrue($container->hasDefinition(StrictAuditRecorder::class));
+        $definition = $container->getDefinition(StrictAuditRecorder::class);
+        self::assertSame(StrictAuditRecorder::class, $definition->getClass());
+        self::assertTrue($definition->isAutowired());
+        self::assertFalse($definition->isAutoconfigured());
+        self::assertFalse($definition->isPublic());
+        self::assertTrue($definition->isShared());
+        self::assertSame([], $definition->getArguments());
+        self::assertSame([], $definition->getTags());
+
+        self::assertTrue($container->hasAlias(AuditRecorderInterface::class));
+        $alias = $container->getAlias(AuditRecorderInterface::class);
+        self::assertSame(StrictAuditRecorder::class, (string) $alias);
+        self::assertFalse($alias->isPublic());
+
+        foreach ([AuditEntryFactoryInterface::class, AuditStorageInterface::class, ClockInterface::class] as $contract) {
+            self::assertFalse($container->hasAlias($contract));
+        }
+        self::assertNoTransactionalParameters($container);
+
+        $container->setAlias(IdentifierExtractorInterface::class, 'app.identifier_extractor')->setPublic(false);
+        $container->setAlias(AuditActorResolverInterface::class, 'app.actor_resolver')->setPublic(false);
+        self::assertSame('app.identifier_extractor', (string) $container->getAlias(IdentifierExtractorInterface::class));
+        self::assertSame('app.actor_resolver', (string) $container->getAlias(AuditActorResolverInterface::class));
+    }
+
+    private static function assertNoTransactionalParameters(ContainerBuilder $container): void
+    {
+        $parameters = array_filter(
+            array_keys($container->getParameterBag()->all()),
+            static fn (int|string $name): bool => str_starts_with((string) $name, 'zhortein_auditable.transactional.'),
+        );
+        self::assertSame([], $parameters);
     }
 
     /** @param list<ClassMetadata<object>> $metadata

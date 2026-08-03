@@ -18,6 +18,13 @@ final class Configuration implements ConfigurationInterface
             ->children()
             ->booleanNode('enabled')->defaultTrue()->end()
 
+            ->arrayNode('transactional')
+            ->addDefaultsIfNotSet()
+            ->children()
+            ->booleanNode('enabled')->defaultFalse()->end()
+            ->end()
+            ->end()
+
             ->arrayNode('async')
             ->addDefaultsIfNotSet()
             ->children()

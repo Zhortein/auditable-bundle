@@ -11,6 +11,8 @@ use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Zhortein\AuditableBundle\Service\AsyncAuditEntryWriter;
 use Zhortein\AuditableBundle\Service\AuditEntryWriterInterface;
 use Zhortein\AuditableBundle\Service\SyncAuditEntryWriter;
+use Zhortein\AuditableBundle\Transactional\Contract\AuditRecorderInterface;
+use Zhortein\AuditableBundle\Transactional\Service\StrictAuditRecorder;
 
 final class ZhorteinAuditableExtension extends Extension
 {
@@ -33,6 +35,18 @@ final class ZhorteinAuditableExtension extends Extension
 
         $loader = new PhpFileLoader($container, new FileLocator(__DIR__.'/../../config'));
         $loader->load('services.php');
+        $container->removeDefinition(StrictAuditRecorder::class);
+
+        if ($config['transactional']['enabled']) {
+            $container
+                ->register(StrictAuditRecorder::class, StrictAuditRecorder::class)
+                ->setAutowired(true)
+                ->setAutoconfigured(false)
+                ->setPublic(false);
+            $container
+                ->setAlias(AuditRecorderInterface::class, StrictAuditRecorder::class)
+                ->setPublic(false);
+        }
 
         // Alias Writer (sync vs async)
         $asyncEnabled = (bool) $config['async']['enabled'];

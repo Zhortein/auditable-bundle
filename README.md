@@ -144,6 +144,40 @@ The resolver automatically handles:
 - Null users (not authenticated) → stores `null`
 - Impersonation → stores both original user and impersonator IDs
 
+### Opt-in transactional recorder wiring
+
+The strict transactional recorder is disabled by default. Enable its Symfony container wiring explicitly:
+
+```yaml
+# config/packages/zhortein_auditable.yaml
+zhortein_auditable:
+  transactional:
+    enabled: true
+```
+
+The application must provide the entry factory, storage and PSR-20 clock through standard Symfony aliases:
+
+```yaml
+# config/services.yaml
+services:
+  App\Audit\AuditEntryFactory: ~
+  App\Audit\AuditStorage: ~
+  App\Audit\AuditClock: ~
+
+  Zhortein\AuditableBundle\Transactional\Contract\AuditEntryFactoryInterface:
+    alias: App\Audit\AuditEntryFactory
+
+  Zhortein\AuditableBundle\Transactional\Contract\AuditStorageInterface:
+    alias: App\Audit\AuditStorage
+
+  Psr\Clock\ClockInterface:
+    alias: App\Audit\AuditClock
+```
+
+The bundle supplies the Doctrine identifier extractor and Symfony Security actor resolver by default. Applications can replace their `IdentifierExtractorInterface` and `AuditActorResolverInterface` aliases using standard Symfony service configuration.
+
+No entry factory, storage or clock implementation is supplied by default, and activation fails during container compilation if one is missing. The recorder performs no flush or commit and does not manage transactions. With `transactional.enabled: false`, the legacy behavior and its existing services remain unchanged.
+
 ## What gets stored
 
 Each `AuditEntry` record in the audit trail contains:

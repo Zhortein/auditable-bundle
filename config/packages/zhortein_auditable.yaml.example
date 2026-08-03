@@ -11,6 +11,12 @@ zhortein_auditable:
   # Master enable/disable switch for the entire auditing system
   enabled: true
 
+  # Strict transactional recorder wiring is opt-in and disabled by default.
+  # Enabling it requires application services or aliases for
+  # AuditEntryFactoryInterface, AuditStorageInterface and Psr\Clock\ClockInterface.
+  transactional:
+    enabled: false
+
   # Async message persistence configuration
   async:
     # Set to true to dispatch audit messages to Messenger (recommended)

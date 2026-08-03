@@ -15,6 +15,7 @@
 - Add a default Doctrine ORM identifier extractor for deterministic scalar, Stringable and primitive composite audit subjects.
 - Add a default Symfony Security actor resolver for authenticated users and immediate SwitchUserToken impersonation context.
 - Add a manually composable strict transactional recorder that resolves audit subjects, actors and timestamps before delegating to application-supplied entry factories and storage.
+- Add opt-in Symfony container wiring for the strict transactional recorder, requiring application-provided entry factory, storage and PSR-20 clock services.
 
 ## [1.0.0] - 2025-12-24
 

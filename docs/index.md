@@ -53,8 +53,11 @@ All audit entries are persisted to a dedicated `audit_entry` table, with optiona
 
 - [Installation & Quick Start](../README.md#installation)
 - [Configuration Reference](../README.md#configuration-reference)
+- [Opt-in transactional recorder wiring](../README.md#opt-in-transactional-recorder-wiring)
 - [Security & PII Handling](../README.md#security--pii)
 - [GitHub Repository](https://github.com/zhortein/auditable-bundle)
+
+The strict transactional recorder requires explicit activation and application-provided entry factory, storage and PSR-20 clock services. The bundle provides no implicit storage implementation or flush; see [the README wiring section](../README.md#opt-in-transactional-recorder-wiring).
 
 ## Architecture
 
