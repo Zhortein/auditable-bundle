@@ -25,6 +25,7 @@ jobs:
             doctrine_orm: "3"
             doctrine_dbal: "3"
             doctrine_persistence: "3"
+            prefer_lowest: true
             dependency_flags: "--prefer-lowest --prefer-stable"
             native_mbstring: false
             extensions: "pdo_sqlite, :mbstring, iconv, dom, xml, zip"
@@ -36,6 +37,7 @@ jobs:
             doctrine_orm: "3"
             doctrine_dbal: "4"
             doctrine_persistence: "4"
+            prefer_lowest: false
             dependency_flags: ""
             native_mbstring: true
             extensions: "pdo_sqlite, mbstring, iconv, dom, xml, zip"
@@ -152,6 +154,76 @@ jobs:
         run: composer update --prefer-dist --no-interaction --no-progress --with "doctrine/doctrine-bundle:^${{ matrix.doctrine_bundle }}.0" --with "doctrine/orm:^${{ matrix.doctrine_orm }}.0"
       - run: composer validate --strict
       - run: composer phpstan -- --memory-limit=512M
+
+  transactional-postgresql:
+    name: Transactional PostgreSQL / ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: PHP 8.3 / Symfony 7.4 / DBundle 2.19 / ORM 3 / lowest
+            php: "8.3"
+            symfony: "7.4.*"
+            doctrine_bundle: "2.19"
+            doctrine_bundle_major: "2"
+            doctrine_orm: "3"
+            doctrine_dbal: "3"
+            doctrine_persistence: "3"
+            dependency_flags: "--prefer-lowest --prefer-stable"
+          - name: PHP 8.5 / Symfony 8.x / DBundle 3 / ORM 3 / latest
+            php: "8.5"
+            symfony: "8.*"
+            symfony_resolved: "8.1.*"
+            doctrine_bundle: "3"
+            doctrine_bundle_major: "3"
+            doctrine_orm: "3"
+            doctrine_dbal: "4"
+            doctrine_persistence: "4"
+            dependency_flags: ""
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: auditable_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd "pg_isready -U postgres -d auditable_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    env:
+      TEST_DATABASE_URL: "postgresql://postgres:postgres@127.0.0.1:5432/auditable_test?serverVersion=16&charset=utf8"
+      SYMFONY_DEPRECATIONS_HELPER: "max[direct]=0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "${{ matrix.php }}"
+          extensions: pdo_pgsql, mbstring, dom, xml, zip
+          tools: composer:v2
+          coverage: none
+      - name: Install Symfony Flex
+        run: |
+          composer global config --no-plugins allow-plugins.symfony/flex true
+          composer global require --no-progress --no-scripts --no-plugins symfony/flex:^2
+      - name: Resolve dependencies
+        env:
+          SYMFONY_REQUIRE: "${{ matrix.symfony }}"
+        run: composer update --prefer-dist --no-interaction --no-progress --with "doctrine/doctrine-bundle:^${{ matrix.doctrine_bundle }}.0" --with "doctrine/orm:^${{ matrix.doctrine_orm }}.0" --with "doctrine/dbal:^${{ matrix.doctrine_dbal }}.0" --with "doctrine/persistence:^${{ matrix.doctrine_persistence }}.0" ${{ matrix.dependency_flags }}
+      - run: composer validate --strict
+      - name: Assert resolved versions
+        env:
+          EXPECT_NATIVE_MBSTRING: "true"
+        run: php .github/ci/assert-versions.php "${{ matrix.php }}" "${{ matrix.symfony_resolved || matrix.symfony }}" "${{ matrix.doctrine_bundle_major }}" "${{ matrix.doctrine_orm }}" "${{ matrix.doctrine_dbal }}" "${{ matrix.doctrine_persistence }}"
+      - run: composer check-platform-reqs
+      - run: composer show --direct symfony/uid
+      - run: composer why symfony/uid
+      - run: composer test:postgresql
 
   coding-style:
     name: Coding style
