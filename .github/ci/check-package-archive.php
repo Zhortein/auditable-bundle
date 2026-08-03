@@ -78,6 +78,7 @@ try {
         'docs/compatibility.md',
         'docs/index.md',
         'docs/legacy-mode.md',
+        'docs/release-process.md',
         'docs/security-privacy.md',
         'docs/transactional-doctrine.md',
     ];

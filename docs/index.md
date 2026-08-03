@@ -12,4 +12,8 @@ Zhortein Auditable Bundle supports the compatibility-preserved legacy listener a
 - [Compatibility and deprecation](compatibility.md) — supported matrices, API freezes and 2.x policy
 - [Changelog](../CHANGELOG.md)
 
+## Maintainer lifecycle
+
+- [Release process](release-process.md) — branch progression, publication controls and recovery
+
 The transactional PostgreSQL suite proves shared commit, shared rollback and fail-closed rollback. SQLite covers most container and mapping integration tests. Neither database choice imposes an audit entity or storage on consuming applications.
