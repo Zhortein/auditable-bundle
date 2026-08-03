@@ -1,112 +1,15 @@
-# Zhortein Auditable Bundle Documentation
+# Zhortein Auditable Bundle documentation
 
-A lightweight Symfony bundle for automatic audit trail tracking on Doctrine ORM entities.
+Zhortein Auditable Bundle supports the compatibility-preserved legacy listener and an opt-in strict transactional recorder. Start with the [README overview](../README.md) to choose the appropriate path.
 
-## Requirements
+## Guides
 
-- PHP 8.3 or later
-- Symfony 7.4 or 8.x
-- Doctrine ORM 3.x
-- DoctrineBundle 2.19 or 3.x
+- [Overview and quick starts](../README.md)
+- [Legacy mode](legacy-mode.md) — automatic Doctrine lifecycle auditing and its historical fail-open semantics
+- [Transactional Doctrine integration](transactional-doctrine.md) — application-owned persistence and transaction boundaries
+- [Upgrade from 1.0 to 2.0](../UPGRADE-2.0.md) — platform changes, migration paths and rollback planning
+- [Security and privacy](security-privacy.md) — data minimization, access, retention and guarantees not provided
+- [Compatibility and deprecation](compatibility.md) — supported matrices, API freezes and 2.x policy
+- [Changelog](../CHANGELOG.md)
 
-The bundle includes `symfony/polyfill-mbstring`, so the native `mbstring` extension is optional. The native extension remains recommended for the best multibyte string performance.
-
-## Overview
-
-This bundle provides a declarative, attribute-based system to automatically track changes to your Doctrine entities. When you mark an entity with `#[Auditable]`, the bundle's Doctrine listener automatically captures:
-
-- **Entity creations** (INSERT)
-- **Entity modifications** (UPDATE) with field-level change detection
-- **Entity deletions** (DELETE)
-
-All audit entries are persisted to a dedicated `audit_entry` table, with optional async processing via Symfony Messenger.
-
-## Core Features
-
-### ✅ Attribute-based configuration
-- `#[Auditable]` on entity classes to enable auditing
-- `#[AuditField(label: '...')]` on properties for custom field labels
-- `#[AuditIgnore]` on sensitive fields to exclude from audit logs
-
-### ✅ Change detection
-- Automatic diff of old → new values for UPDATE operations
-- Smart stringification of complex types (Enums, Collections, Objects, etc.)
-- Configurable truncation of long values
-
-### ✅ Actor tracking
-- Integration with Symfony Security to track "who did it"
-- Automatic impersonation detection (original user vs impersonator)
-- Fallback to null for unauthenticated actions
-
-### ✅ Flexible persistence
-- **Async mode** (recommended): Messages dispatched to Messenger, processed in background
-- **Sync mode**: Audit entries written immediately within the request lifecycle
-- Easy toggle between modes via configuration
-
-### ✅ Production-ready
-- Full type checking (PHPStan level 8)
-- Comprehensive test coverage
-- Follows Symfony conventions and best practices
-- Stable API suitable for package distribution
-
-## Quick links
-
-- [Installation & Quick Start](../README.md#installation)
-- [Configuration Reference](../README.md#configuration-reference)
-- [Opt-in transactional recorder wiring](../README.md#opt-in-transactional-recorder-wiring)
-- [Transactional Doctrine and PostgreSQL guide](transactional-doctrine.md)
-- [Transactional-only mapping](transactional-doctrine.md#transactional-only-mapping)
-- [Security & PII Handling](../README.md#security--pii)
-- [GitHub Repository](https://github.com/zhortein/auditable-bundle)
-
-The strict transactional recorder requires explicit activation and application-provided entry factory, storage and PSR-20 clock services. The bundle provides no implicit storage implementation or flush; see [the README wiring section](../README.md#opt-in-transactional-recorder-wiring).
-
-The [transactional Doctrine guide](transactional-doctrine.md) documents the application-owned mapping and executable PostgreSQL proofs for shared commit, shared rollback and fail-closed behavior, including the explicit [transactional-only mapping](transactional-doctrine.md#transactional-only-mapping) opt-out.
-
-## Architecture
-
-The bundle consists of:
-
-- **Attributes**: Configuration metadata for entities and fields
-- **Metadata Provider**: Reflection-based extraction of audit configuration
-- **Change Detector**: Computes diffs between old and new entity states
-- **Historizer**: Main service for recording audit entries (entry point for custom logging)
-- **Doctrine Listener**: Intercepts entity lifecycle events to trigger auditing
-- **Writers**: Sync/Async implementations for persisting audit data
-- **Message Handler**: Processes queued audit messages from Messenger
-
-## Example usage
-
-```php
-use Zhortein\AuditableBundle\Attribute\Auditable;
-use Zhortein\AuditableBundle\Attribute\AuditField;
-use Zhortein\AuditableBundle\Attribute\AuditIgnore;
-
-#[Auditable(label: 'Customer')]
-class Customer
-{
-    #[AuditField(label: 'Email Address')]
-    private string $email;
-
-    #[AuditField(label: 'Full Name')]
-    private string $name;
-
-    #[AuditIgnore]
-    private string $passwordHash;
-}
-
-// In a controller/service:
-$customer->setEmail('new@example.com');
-$em->persist($customer);
-$em->flush();
-
-// Automatically generates an audit entry:
-// Title: "Update [Customer] - 2 field(s) changed"
-// Description: "Email Address: old@example.com → new@example.com"
-```
-
-## Further reading
-
-- See [README.md](../README.md) for installation and configuration
-- Review source code documentation in `/src` for detailed API information
-- Check the [tests on GitHub](https://github.com/Zhortein/auditable-bundle/tree/main/tests) for integration examples
+The transactional PostgreSQL suite proves shared commit, shared rollback and fail-closed rollback. SQLite covers most container and mapping integration tests. Neither database choice imposes an audit entity or storage on consuming applications.

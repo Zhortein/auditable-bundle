@@ -2,6 +2,8 @@
 
 The strict recorder is deliberately independent from an application's persistence model. An application that stores audit entries with Doctrine supplies its own audit entity, `AuditEntryFactoryInterface` implementation, `AuditStorageInterface` implementation and PSR-20 clock. The bundle provides none of these persistence choices.
 
+The 2.0 design provides only strict, fail-closed recording: there is no `best_effort` mode. The recorder does not catch exceptions from subject extraction, actor resolution, the factory or storage. Applications that need the compatibility-preserved fail-open behavior should use the [legacy mode](legacy-mode.md) and account for its different transaction semantics.
+
 ## Application-owned storage
 
 A minimal Doctrine storage attaches the application-owned audit entity to the same Unit of Work as the business mutation:
@@ -50,6 +52,12 @@ After a flush or transaction error, abandon the entity manager according to Doct
 
 The executable PostgreSQL fixtures in [`tests/Fixtures/Transactional/PostgreSql`](https://github.com/Zhortein/auditable-bundle/tree/main/tests/Fixtures/Transactional/PostgreSql) and [`TransactionalAtomicityIntegrationTest`](https://github.com/Zhortein/auditable-bundle/blob/main/tests/Integration/PostgreSql/TransactionalAtomicityIntegrationTest.php) demonstrate shared commit, shared rollback and fail-closed behavior with application-owned UUID v7 entities.
 
+## Explicit values and default strategies
+
+When an `AuditEvent` contains an entity and no explicit subject, the default Doctrine extractor accepts scalar `int` and `string` identifiers, backed enums, stringable identifiers and primitive composite identifiers. Composite identifiers are encoded deterministically with the stable `doctrine-composite-v1` format. Associations that form part of a Doctrine identifier are not supported by the default extractor; use a custom `IdentifierExtractorInterface` or provide an explicit `AuditSubject`.
+
+An explicit `AuditSubject` bypasses identifier extraction. An explicit `AuditActor` bypasses the Symfony Security resolver. An explicit `occurredAt` bypasses the PSR-20 clock. These values let application code express system actors, external subjects or domain timestamps without changing the default aliases.
+
 ## Transactional-only mapping
 
 During a transition, an application can keep the historical mapping while enabling the strict recorder:
@@ -85,3 +93,10 @@ Before disabling the mapping in an application that used asynchronous legacy aud
 4. Only then disable the mapping.
 
 A queued legacy message still depends on the legacy message handler, persister and `AuditEntry` mapping. The bundle does not drain queues automatically. The executable SQLite and PostgreSQL opt-out tests demonstrate that the strict recorder and application-owned audit schema continue to work without registering the legacy metadata.
+
+## Related guidance
+
+- [Upgrade from 1.0 to 2.0](../UPGRADE-2.0.md) covers migration sequencing and rollback planning.
+- [Legacy mode](legacy-mode.md) documents the compatibility-preserved listener and persistence behavior.
+- [Security and privacy](security-privacy.md) describes data-minimization and storage responsibilities.
+- [Compatibility and deprecation](compatibility.md) defines the supported platform and stability guarantees.
