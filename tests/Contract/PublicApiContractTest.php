@@ -7,6 +7,21 @@ namespace Zhortein\AuditableBundle\Tests\Contract;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @phpstan-type PublicParameter array{name: string, type: ?string, by_reference: bool, variadic: bool, has_default: bool, default: mixed}
+ * @phpstan-type PublicMethod array{static: bool, return: ?string, parameters: list<PublicParameter>}
+ * @phpstan-type PublicProperty array{type: ?string, readonly: bool, static: bool}
+ * @phpstan-type PublicContract array{
+ *     kind: 'class'|'interface'|'enum',
+ *     final: bool,
+ *     readonly: bool,
+ *     attribute_targets: ?int,
+ *     enum_cases: array<string, mixed>,
+ *     public_properties: array<string, PublicProperty>,
+ *     public_methods: array<string, PublicMethod>
+ * }
+ * @phpstan-type PublicApi array<string, PublicContract>
+ */
 final class PublicApiContractTest extends TestCase
 {
     private const SNAPSHOT = __DIR__.'/public-api-1.0.0.json';
@@ -17,8 +32,10 @@ final class PublicApiContractTest extends TestCase
         self::assertFileExists(self::SNAPSHOT);
         $expected = json_decode((string) file_get_contents(self::SNAPSHOT), true, flags: \JSON_THROW_ON_ERROR);
         self::assertIsArray($expected);
+        /** @var PublicApi $typedExpected */
+        $typedExpected = $expected;
 
-        self::assertHistoricalContractIsPreserved($expected, $actual);
+        self::assertHistoricalContractIsPreserved($typedExpected, $actual);
     }
 
     public function testAdditionalPublicTypesAndMembersAreAllowed(): void
@@ -53,7 +70,7 @@ final class PublicApiContractTest extends TestCase
         );
     }
 
-    /** @param array<string, mixed> $current */
+    /** @param PublicApi $current */
     #[DataProvider('brokenHistoricalContracts')]
     public function testMissingOrModifiedHistoricalContractIsRejected(array $current): void
     {
@@ -63,7 +80,7 @@ final class PublicApiContractTest extends TestCase
         self::assertHistoricalContractIsPreserved($historical, $current);
     }
 
-    /** @return iterable<string, array{array<string, mixed>}> */
+    /** @return iterable<string, array{PublicApi}> */
     public static function brokenHistoricalContracts(): iterable
     {
         yield 'missing historical type' => [[]];
@@ -73,8 +90,8 @@ final class PublicApiContractTest extends TestCase
         yield 'modified historical type' => [['Legacy\\PublicType' => $modified]];
     }
 
-    /** @return array<string, mixed> */
-    private static function publicApi(): array
+    /** @return PublicApi */
+    public static function publicApi(): array
     {
         $classes = [];
         foreach (self::sourceClasses() as $class) {
@@ -139,23 +156,20 @@ final class PublicApiContractTest extends TestCase
         return $classes;
     }
 
-    /** @param array<string, mixed> $historical
-     * @param array<string, mixed> $current
+    /**
+     * @param PublicApi $historical
+     * @param PublicApi $current
      */
-    private static function assertHistoricalContractIsPreserved(array $historical, array $current): void
+    public static function assertHistoricalContractIsPreserved(array $historical, array $current): void
     {
         foreach ($historical as $class => $expectedContract) {
             self::assertArrayHasKey($class, $current, \sprintf('Historical public type %s no longer exists.', $class));
-            self::assertIsArray($expectedContract);
-            self::assertIsArray($current[$class]);
             $actualContract = $current[$class];
 
             foreach (['kind', 'final', 'readonly', 'attribute_targets', 'enum_cases'] as $key) {
                 self::assertSame($expectedContract[$key], $actualContract[$key], \sprintf('%s changed for %s.', $key, $class));
             }
             foreach (['public_methods', 'public_properties'] as $membersKey) {
-                self::assertIsArray($expectedContract[$membersKey]);
-                self::assertIsArray($actualContract[$membersKey]);
                 foreach ($expectedContract[$membersKey] as $member => $expectedMember) {
                     self::assertArrayHasKey($member, $actualContract[$membersKey], \sprintf('%s::%s no longer has its historical public visibility.', $class, $member));
                     self::assertSame($expectedMember, $actualContract[$membersKey][$member], \sprintf('Public contract of %s::%s changed.', $class, $member));
@@ -164,7 +178,7 @@ final class PublicApiContractTest extends TestCase
         }
     }
 
-    /** @return array<string, mixed> */
+    /** @return PublicContract */
     private static function contractFixture(): array
     {
         return [

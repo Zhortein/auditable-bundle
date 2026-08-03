@@ -1,0 +1,2013 @@
+{
+    "Zhortein\\AuditableBundle\\Attribute\\AuditField": {
+        "kind": "class",
+        "final": true,
+        "readonly": false,
+        "attribute_targets": 8,
+        "enum_cases": [],
+        "public_properties": {
+            "label": {
+                "type": "?string",
+                "readonly": false,
+                "static": false
+            }
+        },
+        "public_methods": {
+            "__construct": {
+                "static": false,
+                "return": null,
+                "parameters": [
+                    {
+                        "name": "label",
+                        "type": "?string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\Attribute\\AuditIgnore": {
+        "kind": "class",
+        "final": true,
+        "readonly": false,
+        "attribute_targets": 8,
+        "enum_cases": [],
+        "public_properties": [],
+        "public_methods": []
+    },
+    "Zhortein\\AuditableBundle\\Attribute\\Auditable": {
+        "kind": "class",
+        "final": true,
+        "readonly": false,
+        "attribute_targets": 1,
+        "enum_cases": [],
+        "public_properties": {
+            "context": {
+                "type": "?string",
+                "readonly": false,
+                "static": false
+            },
+            "label": {
+                "type": "?string",
+                "readonly": false,
+                "static": false
+            }
+        },
+        "public_methods": {
+            "__construct": {
+                "static": false,
+                "return": null,
+                "parameters": [
+                    {
+                        "name": "label",
+                        "type": "?string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": null
+                    },
+                    {
+                        "name": "context",
+                        "type": "?string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\DependencyInjection\\Configuration": {
+        "kind": "class",
+        "final": true,
+        "readonly": false,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": [],
+        "public_methods": {
+            "getConfigTreeBuilder": {
+                "static": false,
+                "return": "Symfony\\Component\\Config\\Definition\\Builder\\TreeBuilder",
+                "parameters": []
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\DependencyInjection\\ZhorteinAuditableExtension": {
+        "kind": "class",
+        "final": true,
+        "readonly": false,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": [],
+        "public_methods": {
+            "load": {
+                "static": false,
+                "return": "void",
+                "parameters": [
+                    {
+                        "name": "configs",
+                        "type": "array",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    },
+                    {
+                        "name": "container",
+                        "type": "Symfony\\Component\\DependencyInjection\\ContainerBuilder",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\Doctrine\\AuditableDoctrineListener": {
+        "kind": "class",
+        "final": true,
+        "readonly": true,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": [],
+        "public_methods": {
+            "__construct": {
+                "static": false,
+                "return": null,
+                "parameters": [
+                    {
+                        "name": "historizer",
+                        "type": "Zhortein\\AuditableBundle\\Service\\Historizer",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    },
+                    {
+                        "name": "metadataProvider",
+                        "type": "Zhortein\\AuditableBundle\\Metadata\\AuditableMetadataProvider",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    },
+                    {
+                        "name": "changeDetector",
+                        "type": "Zhortein\\AuditableBundle\\Service\\ChangeDetector",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    },
+                    {
+                        "name": "enabled",
+                        "type": "bool",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": true
+                    },
+                    {
+                        "name": "trackInsert",
+                        "type": "bool",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": true
+                    },
+                    {
+                        "name": "trackUpdate",
+                        "type": "bool",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": true
+                    },
+                    {
+                        "name": "trackDelete",
+                        "type": "bool",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": true
+                    },
+                    {
+                        "name": "globalIgnoredFields",
+                        "type": "array",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": []
+                    }
+                ]
+            },
+            "onFlush": {
+                "static": false,
+                "return": "void",
+                "parameters": [
+                    {
+                        "name": "args",
+                        "type": "Doctrine\\ORM\\Event\\OnFlushEventArgs",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            },
+            "postPersist": {
+                "static": false,
+                "return": "void",
+                "parameters": [
+                    {
+                        "name": "args",
+                        "type": "Doctrine\\ORM\\Event\\PostPersistEventArgs",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            },
+            "preRemove": {
+                "static": false,
+                "return": "void",
+                "parameters": [
+                    {
+                        "name": "args",
+                        "type": "Doctrine\\ORM\\Event\\PreRemoveEventArgs",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\Entity\\AuditEntry": {
+        "kind": "class",
+        "final": true,
+        "readonly": false,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": [],
+        "public_methods": {
+            "__construct": {
+                "static": false,
+                "return": null,
+                "parameters": []
+            },
+            "getAction": {
+                "static": false,
+                "return": "string",
+                "parameters": []
+            },
+            "getActorId": {
+                "static": false,
+                "return": "?string",
+                "parameters": []
+            },
+            "getContext": {
+                "static": false,
+                "return": "?string",
+                "parameters": []
+            },
+            "getData": {
+                "static": false,
+                "return": "array",
+                "parameters": []
+            },
+            "getDescription": {
+                "static": false,
+                "return": "?string",
+                "parameters": []
+            },
+            "getEntityClass": {
+                "static": false,
+                "return": "?string",
+                "parameters": []
+            },
+            "getEntityId": {
+                "static": false,
+                "return": "?string",
+                "parameters": []
+            },
+            "getId": {
+                "static": false,
+                "return": "?int",
+                "parameters": []
+            },
+            "getImpersonatorId": {
+                "static": false,
+                "return": "?string",
+                "parameters": []
+            },
+            "getLevel": {
+                "static": false,
+                "return": "string",
+                "parameters": []
+            },
+            "getOccurredAt": {
+                "static": false,
+                "return": "DateTimeImmutable",
+                "parameters": []
+            },
+            "getTitle": {
+                "static": false,
+                "return": "string",
+                "parameters": []
+            },
+            "isAuto": {
+                "static": false,
+                "return": "bool",
+                "parameters": []
+            },
+            "setAction": {
+                "static": false,
+                "return": "self",
+                "parameters": [
+                    {
+                        "name": "action",
+                        "type": "string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            },
+            "setActorId": {
+                "static": false,
+                "return": "self",
+                "parameters": [
+                    {
+                        "name": "actorId",
+                        "type": "?string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            },
+            "setContext": {
+                "static": false,
+                "return": "self",
+                "parameters": [
+                    {
+                        "name": "context",
+                        "type": "?string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            },
+            "setData": {
+                "static": false,
+                "return": "self",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "type": "array",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            },
+            "setDescription": {
+                "static": false,
+                "return": "self",
+                "parameters": [
+                    {
+                        "name": "description",
+                        "type": "?string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            },
+            "setEntityClass": {
+                "static": false,
+                "return": "self",
+                "parameters": [
+                    {
+                        "name": "entityClass",
+                        "type": "?string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            },
+            "setEntityId": {
+                "static": false,
+                "return": "self",
+                "parameters": [
+                    {
+                        "name": "entityId",
+                        "type": "?string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            },
+            "setImpersonatorId": {
+                "static": false,
+                "return": "self",
+                "parameters": [
+                    {
+                        "name": "impersonatorId",
+                        "type": "?string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            },
+            "setIsAuto": {
+                "static": false,
+                "return": "self",
+                "parameters": [
+                    {
+                        "name": "isAuto",
+                        "type": "bool",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            },
+            "setLevel": {
+                "static": false,
+                "return": "self",
+                "parameters": [
+                    {
+                        "name": "level",
+                        "type": "string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            },
+            "setOccurredAt": {
+                "static": false,
+                "return": "self",
+                "parameters": [
+                    {
+                        "name": "occurredAt",
+                        "type": "DateTimeImmutable",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            },
+            "setTitle": {
+                "static": false,
+                "return": "self",
+                "parameters": [
+                    {
+                        "name": "title",
+                        "type": "string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\Enum\\AuditAction": {
+        "kind": "enum",
+        "final": true,
+        "readonly": false,
+        "attribute_targets": null,
+        "enum_cases": {
+            "CREATE": "create",
+            "UPDATE": "update",
+            "DELETE": "delete",
+            "LOG": "log"
+        },
+        "public_properties": {
+            "name": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "value": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            }
+        },
+        "public_methods": {
+            "cases": {
+                "static": true,
+                "return": "array",
+                "parameters": []
+            },
+            "from": {
+                "static": true,
+                "return": "static",
+                "parameters": [
+                    {
+                        "name": "value",
+                        "type": "string|int",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            },
+            "tryFrom": {
+                "static": true,
+                "return": "?static",
+                "parameters": [
+                    {
+                        "name": "value",
+                        "type": "string|int",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\Enum\\AuditLevel": {
+        "kind": "enum",
+        "final": true,
+        "readonly": false,
+        "attribute_targets": null,
+        "enum_cases": {
+            "DEBUG": "debug",
+            "INFO": "info",
+            "WARNING": "warning",
+            "ERROR": "error",
+            "CRITICAL": "critical"
+        },
+        "public_properties": {
+            "name": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "value": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            }
+        },
+        "public_methods": {
+            "cases": {
+                "static": true,
+                "return": "array",
+                "parameters": []
+            },
+            "from": {
+                "static": true,
+                "return": "static",
+                "parameters": [
+                    {
+                        "name": "value",
+                        "type": "string|int",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            },
+            "tryFrom": {
+                "static": true,
+                "return": "?static",
+                "parameters": [
+                    {
+                        "name": "value",
+                        "type": "string|int",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\MessageHandler\\PersistAuditEntryMessageHandler": {
+        "kind": "class",
+        "final": true,
+        "readonly": true,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": [],
+        "public_methods": {
+            "__construct": {
+                "static": false,
+                "return": null,
+                "parameters": [
+                    {
+                        "name": "persister",
+                        "type": "Zhortein\\AuditableBundle\\Service\\AuditEntryPersister",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            },
+            "__invoke": {
+                "static": false,
+                "return": "void",
+                "parameters": [
+                    {
+                        "name": "message",
+                        "type": "Zhortein\\AuditableBundle\\Message\\PersistAuditEntryMessage",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\Message\\PersistAuditEntryMessage": {
+        "kind": "class",
+        "final": true,
+        "readonly": true,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": {
+            "action": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "actorId": {
+                "type": "?string",
+                "readonly": true,
+                "static": false
+            },
+            "context": {
+                "type": "?string",
+                "readonly": true,
+                "static": false
+            },
+            "data": {
+                "type": "array",
+                "readonly": true,
+                "static": false
+            },
+            "description": {
+                "type": "?string",
+                "readonly": true,
+                "static": false
+            },
+            "entityClass": {
+                "type": "?string",
+                "readonly": true,
+                "static": false
+            },
+            "entityId": {
+                "type": "?string",
+                "readonly": true,
+                "static": false
+            },
+            "impersonatorId": {
+                "type": "?string",
+                "readonly": true,
+                "static": false
+            },
+            "isAuto": {
+                "type": "bool",
+                "readonly": true,
+                "static": false
+            },
+            "level": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "occurredAt": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "title": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            }
+        },
+        "public_methods": {
+            "__construct": {
+                "static": false,
+                "return": null,
+                "parameters": [
+                    {
+                        "name": "occurredAt",
+                        "type": "string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    },
+                    {
+                        "name": "action",
+                        "type": "string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    },
+                    {
+                        "name": "level",
+                        "type": "string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    },
+                    {
+                        "name": "title",
+                        "type": "string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    },
+                    {
+                        "name": "description",
+                        "type": "?string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": null
+                    },
+                    {
+                        "name": "context",
+                        "type": "?string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": null
+                    },
+                    {
+                        "name": "entityClass",
+                        "type": "?string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": null
+                    },
+                    {
+                        "name": "entityId",
+                        "type": "?string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": null
+                    },
+                    {
+                        "name": "actorId",
+                        "type": "?string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": null
+                    },
+                    {
+                        "name": "impersonatorId",
+                        "type": "?string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": null
+                    },
+                    {
+                        "name": "isAuto",
+                        "type": "bool",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": false
+                    },
+                    {
+                        "name": "data",
+                        "type": "array",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": []
+                    }
+                ]
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\Metadata\\AuditableMetadata": {
+        "kind": "class",
+        "final": true,
+        "readonly": true,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": {
+            "context": {
+                "type": "?string",
+                "readonly": true,
+                "static": false
+            },
+            "fieldLabels": {
+                "type": "array",
+                "readonly": true,
+                "static": false
+            },
+            "ignoredFields": {
+                "type": "array",
+                "readonly": true,
+                "static": false
+            },
+            "label": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            }
+        },
+        "public_methods": {
+            "__construct": {
+                "static": false,
+                "return": null,
+                "parameters": [
+                    {
+                        "name": "label",
+                        "type": "string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    },
+                    {
+                        "name": "context",
+                        "type": "?string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    },
+                    {
+                        "name": "fieldLabels",
+                        "type": "array",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    },
+                    {
+                        "name": "ignoredFields",
+                        "type": "array",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\Metadata\\AuditableMetadataProvider": {
+        "kind": "class",
+        "final": true,
+        "readonly": false,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": [],
+        "public_methods": {
+            "getFor": {
+                "static": false,
+                "return": "?Zhortein\\AuditableBundle\\Metadata\\AuditableMetadata",
+                "parameters": [
+                    {
+                        "name": "entity",
+                        "type": "object",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\Repository\\AuditEntryRepository": {
+        "kind": "class",
+        "final": true,
+        "readonly": false,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": [],
+        "public_methods": {
+            "__construct": {
+                "static": false,
+                "return": null,
+                "parameters": [
+                    {
+                        "name": "registry",
+                        "type": "Doctrine\\Persistence\\ManagerRegistry",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\Service\\ActorResolverInterface": {
+        "kind": "interface",
+        "final": false,
+        "readonly": false,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": [],
+        "public_methods": {
+            "resolveActorId": {
+                "static": false,
+                "return": "?string",
+                "parameters": []
+            },
+            "resolveImpersonatorId": {
+                "static": false,
+                "return": "?string",
+                "parameters": []
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\Service\\AsyncAuditEntryWriter": {
+        "kind": "class",
+        "final": true,
+        "readonly": true,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": [],
+        "public_methods": {
+            "__construct": {
+                "static": false,
+                "return": null,
+                "parameters": [
+                    {
+                        "name": "bus",
+                        "type": "Symfony\\Component\\Messenger\\MessageBusInterface",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            },
+            "write": {
+                "static": false,
+                "return": "void",
+                "parameters": [
+                    {
+                        "name": "message",
+                        "type": "Zhortein\\AuditableBundle\\Message\\PersistAuditEntryMessage",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\Service\\AuditEntryPersister": {
+        "kind": "class",
+        "final": true,
+        "readonly": true,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": [],
+        "public_methods": {
+            "__construct": {
+                "static": false,
+                "return": null,
+                "parameters": [
+                    {
+                        "name": "entityManager",
+                        "type": "Doctrine\\ORM\\EntityManagerInterface",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            },
+            "persist": {
+                "static": false,
+                "return": "void",
+                "parameters": [
+                    {
+                        "name": "message",
+                        "type": "Zhortein\\AuditableBundle\\Message\\PersistAuditEntryMessage",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\Service\\AuditEntryWriterInterface": {
+        "kind": "interface",
+        "final": false,
+        "readonly": false,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": [],
+        "public_methods": {
+            "write": {
+                "static": false,
+                "return": "void",
+                "parameters": [
+                    {
+                        "name": "message",
+                        "type": "Zhortein\\AuditableBundle\\Message\\PersistAuditEntryMessage",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\Service\\ChangeDetector": {
+        "kind": "class",
+        "final": true,
+        "readonly": true,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": [],
+        "public_methods": {
+            "__construct": {
+                "static": false,
+                "return": null,
+                "parameters": [
+                    {
+                        "name": "maxStringLength",
+                        "type": "int",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": 180
+                    }
+                ]
+            },
+            "getChanges": {
+                "static": false,
+                "return": "array",
+                "parameters": [
+                    {
+                        "name": "em",
+                        "type": "Doctrine\\ORM\\EntityManagerInterface",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    },
+                    {
+                        "name": "entity",
+                        "type": "object",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\Service\\Historizer": {
+        "kind": "class",
+        "final": true,
+        "readonly": true,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": [],
+        "public_methods": {
+            "__construct": {
+                "static": false,
+                "return": null,
+                "parameters": [
+                    {
+                        "name": "writer",
+                        "type": "Zhortein\\AuditableBundle\\Service\\AuditEntryWriterInterface",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    },
+                    {
+                        "name": "actorResolver",
+                        "type": "Zhortein\\AuditableBundle\\Service\\ActorResolverInterface",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    },
+                    {
+                        "name": "logger",
+                        "type": "Psr\\Log\\LoggerInterface",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    },
+                    {
+                        "name": "enabled",
+                        "type": "bool",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": true
+                    }
+                ]
+            },
+            "historize": {
+                "static": false,
+                "return": "void",
+                "parameters": [
+                    {
+                        "name": "action",
+                        "type": "Zhortein\\AuditableBundle\\Enum\\AuditAction|string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    },
+                    {
+                        "name": "title",
+                        "type": "string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    },
+                    {
+                        "name": "description",
+                        "type": "?string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": null
+                    },
+                    {
+                        "name": "entity",
+                        "type": "?object",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": null
+                    },
+                    {
+                        "name": "context",
+                        "type": "?string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": null
+                    },
+                    {
+                        "name": "level",
+                        "type": "Zhortein\\AuditableBundle\\Enum\\AuditLevel|string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": "info"
+                    },
+                    {
+                        "name": "isAuto",
+                        "type": "bool",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": false
+                    },
+                    {
+                        "name": "data",
+                        "type": "array",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": []
+                    }
+                ]
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\Service\\SecurityActorResolver": {
+        "kind": "class",
+        "final": true,
+        "readonly": true,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": [],
+        "public_methods": {
+            "__construct": {
+                "static": false,
+                "return": null,
+                "parameters": [
+                    {
+                        "name": "security",
+                        "type": "Symfony\\Bundle\\SecurityBundle\\Security",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            },
+            "resolveActorId": {
+                "static": false,
+                "return": "?string",
+                "parameters": []
+            },
+            "resolveImpersonatorId": {
+                "static": false,
+                "return": "?string",
+                "parameters": []
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\Service\\SyncAuditEntryWriter": {
+        "kind": "class",
+        "final": true,
+        "readonly": true,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": [],
+        "public_methods": {
+            "__construct": {
+                "static": false,
+                "return": null,
+                "parameters": [
+                    {
+                        "name": "persister",
+                        "type": "Zhortein\\AuditableBundle\\Service\\AuditEntryPersister",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            },
+            "write": {
+                "static": false,
+                "return": "void",
+                "parameters": [
+                    {
+                        "name": "message",
+                        "type": "Zhortein\\AuditableBundle\\Message\\PersistAuditEntryMessage",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\Transactional\\Contract\\AuditActorResolverInterface": {
+        "kind": "interface",
+        "final": false,
+        "readonly": false,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": [],
+        "public_methods": {
+            "resolveActor": {
+                "static": false,
+                "return": "?Zhortein\\AuditableBundle\\Transactional\\Model\\AuditActor",
+                "parameters": []
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\Transactional\\Contract\\AuditEntryFactoryInterface": {
+        "kind": "interface",
+        "final": false,
+        "readonly": false,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": [],
+        "public_methods": {
+            "create": {
+                "static": false,
+                "return": "object",
+                "parameters": [
+                    {
+                        "name": "record",
+                        "type": "Zhortein\\AuditableBundle\\Transactional\\Model\\AuditRecord",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\Transactional\\Contract\\AuditRecorderInterface": {
+        "kind": "interface",
+        "final": false,
+        "readonly": false,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": [],
+        "public_methods": {
+            "record": {
+                "static": false,
+                "return": "void",
+                "parameters": [
+                    {
+                        "name": "event",
+                        "type": "Zhortein\\AuditableBundle\\Transactional\\Model\\AuditEvent",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\Transactional\\Contract\\AuditStorageInterface": {
+        "kind": "interface",
+        "final": false,
+        "readonly": false,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": [],
+        "public_methods": {
+            "persist": {
+                "static": false,
+                "return": "void",
+                "parameters": [
+                    {
+                        "name": "entry",
+                        "type": "object",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\Transactional\\Contract\\IdentifierExtractorInterface": {
+        "kind": "interface",
+        "final": false,
+        "readonly": false,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": [],
+        "public_methods": {
+            "extract": {
+                "static": false,
+                "return": "Zhortein\\AuditableBundle\\Transactional\\Model\\AuditSubject",
+                "parameters": [
+                    {
+                        "name": "entity",
+                        "type": "object",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\Transactional\\Exception\\ActorResolutionException": {
+        "kind": "class",
+        "final": true,
+        "readonly": false,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": [],
+        "public_methods": []
+    },
+    "Zhortein\\AuditableBundle\\Transactional\\Exception\\IdentifierExtractionException": {
+        "kind": "class",
+        "final": true,
+        "readonly": false,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": [],
+        "public_methods": []
+    },
+    "Zhortein\\AuditableBundle\\Transactional\\Model\\AuditActor": {
+        "kind": "class",
+        "final": true,
+        "readonly": true,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": {
+            "identifier": {
+                "type": "?string",
+                "readonly": true,
+                "static": false
+            },
+            "impersonatorIdentifier": {
+                "type": "?string",
+                "readonly": true,
+                "static": false
+            },
+            "metadata": {
+                "type": "array",
+                "readonly": true,
+                "static": false
+            },
+            "type": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            }
+        },
+        "public_methods": {
+            "__construct": {
+                "static": false,
+                "return": null,
+                "parameters": [
+                    {
+                        "name": "type",
+                        "type": "string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    },
+                    {
+                        "name": "identifier",
+                        "type": "?string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": null
+                    },
+                    {
+                        "name": "impersonatorIdentifier",
+                        "type": "?string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": null
+                    },
+                    {
+                        "name": "metadata",
+                        "type": "array",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": []
+                    }
+                ]
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\Transactional\\Model\\AuditEvent": {
+        "kind": "class",
+        "final": true,
+        "readonly": true,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": {
+            "action": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "actor": {
+                "type": "?Zhortein\\AuditableBundle\\Transactional\\Model\\AuditActor",
+                "readonly": true,
+                "static": false
+            },
+            "context": {
+                "type": "?string",
+                "readonly": true,
+                "static": false
+            },
+            "data": {
+                "type": "array",
+                "readonly": true,
+                "static": false
+            },
+            "description": {
+                "type": "?string",
+                "readonly": true,
+                "static": false
+            },
+            "entity": {
+                "type": "?object",
+                "readonly": true,
+                "static": false
+            },
+            "isAuto": {
+                "type": "bool",
+                "readonly": true,
+                "static": false
+            },
+            "level": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "occurredAt": {
+                "type": "?DateTimeImmutable",
+                "readonly": true,
+                "static": false
+            },
+            "subject": {
+                "type": "?Zhortein\\AuditableBundle\\Transactional\\Model\\AuditSubject",
+                "readonly": true,
+                "static": false
+            },
+            "title": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            }
+        },
+        "public_methods": {
+            "__construct": {
+                "static": false,
+                "return": null,
+                "parameters": [
+                    {
+                        "name": "action",
+                        "type": "Zhortein\\AuditableBundle\\Enum\\AuditAction|string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    },
+                    {
+                        "name": "title",
+                        "type": "string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    },
+                    {
+                        "name": "description",
+                        "type": "?string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": null
+                    },
+                    {
+                        "name": "context",
+                        "type": "?string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": null
+                    },
+                    {
+                        "name": "level",
+                        "type": "Zhortein\\AuditableBundle\\Enum\\AuditLevel|string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": "info"
+                    },
+                    {
+                        "name": "entity",
+                        "type": "?object",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": null
+                    },
+                    {
+                        "name": "subject",
+                        "type": "?Zhortein\\AuditableBundle\\Transactional\\Model\\AuditSubject",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": null
+                    },
+                    {
+                        "name": "actor",
+                        "type": "?Zhortein\\AuditableBundle\\Transactional\\Model\\AuditActor",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": null
+                    },
+                    {
+                        "name": "isAuto",
+                        "type": "bool",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": false
+                    },
+                    {
+                        "name": "data",
+                        "type": "array",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": []
+                    },
+                    {
+                        "name": "occurredAt",
+                        "type": "?DateTimeImmutable",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\Transactional\\Model\\AuditRecord": {
+        "kind": "class",
+        "final": true,
+        "readonly": true,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": {
+            "action": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "actor": {
+                "type": "?Zhortein\\AuditableBundle\\Transactional\\Model\\AuditActor",
+                "readonly": true,
+                "static": false
+            },
+            "context": {
+                "type": "?string",
+                "readonly": true,
+                "static": false
+            },
+            "data": {
+                "type": "array",
+                "readonly": true,
+                "static": false
+            },
+            "description": {
+                "type": "?string",
+                "readonly": true,
+                "static": false
+            },
+            "isAuto": {
+                "type": "bool",
+                "readonly": true,
+                "static": false
+            },
+            "level": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "occurredAt": {
+                "type": "DateTimeImmutable",
+                "readonly": true,
+                "static": false
+            },
+            "subject": {
+                "type": "?Zhortein\\AuditableBundle\\Transactional\\Model\\AuditSubject",
+                "readonly": true,
+                "static": false
+            },
+            "title": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            }
+        },
+        "public_methods": {
+            "__construct": {
+                "static": false,
+                "return": null,
+                "parameters": [
+                    {
+                        "name": "occurredAt",
+                        "type": "DateTimeImmutable",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    },
+                    {
+                        "name": "action",
+                        "type": "string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    },
+                    {
+                        "name": "level",
+                        "type": "string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    },
+                    {
+                        "name": "title",
+                        "type": "string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    },
+                    {
+                        "name": "description",
+                        "type": "?string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": null
+                    },
+                    {
+                        "name": "context",
+                        "type": "?string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": null
+                    },
+                    {
+                        "name": "subject",
+                        "type": "?Zhortein\\AuditableBundle\\Transactional\\Model\\AuditSubject",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": null
+                    },
+                    {
+                        "name": "actor",
+                        "type": "?Zhortein\\AuditableBundle\\Transactional\\Model\\AuditActor",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": null
+                    },
+                    {
+                        "name": "isAuto",
+                        "type": "bool",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": false
+                    },
+                    {
+                        "name": "data",
+                        "type": "array",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": true,
+                        "default": []
+                    }
+                ]
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\Transactional\\Model\\AuditSubject": {
+        "kind": "class",
+        "final": true,
+        "readonly": true,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": {
+            "identifier": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "type": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            }
+        },
+        "public_methods": {
+            "__construct": {
+                "static": false,
+                "return": null,
+                "parameters": [
+                    {
+                        "name": "type",
+                        "type": "string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    },
+                    {
+                        "name": "identifier",
+                        "type": "string",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\Transactional\\Service\\DoctrineIdentifierExtractor": {
+        "kind": "class",
+        "final": true,
+        "readonly": true,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": [],
+        "public_methods": {
+            "__construct": {
+                "static": false,
+                "return": null,
+                "parameters": [
+                    {
+                        "name": "registry",
+                        "type": "Doctrine\\Persistence\\ManagerRegistry",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            },
+            "extract": {
+                "static": false,
+                "return": "Zhortein\\AuditableBundle\\Transactional\\Model\\AuditSubject",
+                "parameters": [
+                    {
+                        "name": "entity",
+                        "type": "object",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\Transactional\\Service\\StrictAuditRecorder": {
+        "kind": "class",
+        "final": true,
+        "readonly": true,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": [],
+        "public_methods": {
+            "__construct": {
+                "static": false,
+                "return": null,
+                "parameters": [
+                    {
+                        "name": "identifierExtractor",
+                        "type": "Zhortein\\AuditableBundle\\Transactional\\Contract\\IdentifierExtractorInterface",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    },
+                    {
+                        "name": "actorResolver",
+                        "type": "Zhortein\\AuditableBundle\\Transactional\\Contract\\AuditActorResolverInterface",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    },
+                    {
+                        "name": "clock",
+                        "type": "Psr\\Clock\\ClockInterface",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    },
+                    {
+                        "name": "entryFactory",
+                        "type": "Zhortein\\AuditableBundle\\Transactional\\Contract\\AuditEntryFactoryInterface",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    },
+                    {
+                        "name": "storage",
+                        "type": "Zhortein\\AuditableBundle\\Transactional\\Contract\\AuditStorageInterface",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            },
+            "record": {
+                "static": false,
+                "return": "void",
+                "parameters": [
+                    {
+                        "name": "event",
+                        "type": "Zhortein\\AuditableBundle\\Transactional\\Model\\AuditEvent",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\Transactional\\Service\\SymfonySecurityActorResolver": {
+        "kind": "class",
+        "final": true,
+        "readonly": true,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": [],
+        "public_methods": {
+            "__construct": {
+                "static": false,
+                "return": null,
+                "parameters": [
+                    {
+                        "name": "tokenStorage",
+                        "type": "Symfony\\Component\\Security\\Core\\Authentication\\Token\\Storage\\TokenStorageInterface",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            },
+            "resolveActor": {
+                "static": false,
+                "return": "?Zhortein\\AuditableBundle\\Transactional\\Model\\AuditActor",
+                "parameters": []
+            }
+        }
+    },
+    "Zhortein\\AuditableBundle\\ZhorteinAuditableBundle": {
+        "kind": "class",
+        "final": true,
+        "readonly": false,
+        "attribute_targets": null,
+        "enum_cases": [],
+        "public_properties": [],
+        "public_methods": {
+            "build": {
+                "static": false,
+                "return": "void",
+                "parameters": [
+                    {
+                        "name": "container",
+                        "type": "Symfony\\Component\\DependencyInjection\\ContainerBuilder",
+                        "by_reference": false,
+                        "variadic": false,
+                        "has_default": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    }
+}
