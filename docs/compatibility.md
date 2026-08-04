@@ -2,7 +2,7 @@
 
 ## Supported platform
 
-The future 2.x series targets:
+The 2.x series targets:
 
 - PHP 8.3 and later within the tested range;
 - Symfony 7.4 and 8.x;
