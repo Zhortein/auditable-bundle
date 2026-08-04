@@ -11,15 +11,27 @@ use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Zhortein\AuditableBundle\Service\AsyncAuditEntryWriter;
 use Zhortein\AuditableBundle\Service\AuditEntryWriterInterface;
 use Zhortein\AuditableBundle\Service\SyncAuditEntryWriter;
+use Zhortein\AuditableBundle\Transactional\Contract\AuditRecorderInterface;
+use Zhortein\AuditableBundle\Transactional\Service\StrictAuditRecorder;
 
 final class ZhorteinAuditableExtension extends Extension
 {
     public function load(array $configs, ContainerBuilder $container): void
     {
         $configuration = new Configuration();
+        /** @var array{
+         *     enabled: bool,
+         *     legacy_mapping: array{enabled: bool},
+         *     transactional: array{enabled: bool},
+         *     async: array{enabled: bool, transport: string},
+         *     listener: array{track_insert: bool, track_update: bool, track_delete: bool},
+         *     fields: array{max_string_length: int, global_ignored: list<string>}
+         * } $config
+         */
         $config = $this->processConfiguration($configuration, $configs);
 
         $container->setParameter('zhortein_auditable.enabled', (bool) $config['enabled']);
+        $container->setParameter('zhortein_auditable.legacy_mapping.enabled', (bool) $config['legacy_mapping']['enabled']);
 
         $container->setParameter('zhortein_auditable.async.enabled', (bool) $config['async']['enabled']);
         $container->setParameter('zhortein_auditable.async.transport', (string) $config['async']['transport']);
@@ -33,6 +45,18 @@ final class ZhorteinAuditableExtension extends Extension
 
         $loader = new PhpFileLoader($container, new FileLocator(__DIR__.'/../../config'));
         $loader->load('services.php');
+        $container->removeDefinition(StrictAuditRecorder::class);
+
+        if ($config['transactional']['enabled']) {
+            $container
+                ->register(StrictAuditRecorder::class, StrictAuditRecorder::class)
+                ->setAutowired(true)
+                ->setAutoconfigured(false)
+                ->setPublic(false);
+            $container
+                ->setAlias(AuditRecorderInterface::class, StrictAuditRecorder::class)
+                ->setPublic(false);
+        }
 
         // Alias Writer (sync vs async)
         $asyncEnabled = (bool) $config['async']['enabled'];

@@ -11,14 +11,26 @@ zhortein_auditable:
   # Master enable/disable switch for the entire auditing system
   enabled: true
 
-  # Async message persistence configuration
+  # Keep the bundle's historical AuditEntry Doctrine mapping by default.
+  # Disabling it requires enabled: false and is intended for applications that
+  # use only their own transactional audit storage. No table is removed automatically.
+  legacy_mapping:
+    enabled: true
+
+  # Strict transactional recorder wiring is opt-in and disabled by default.
+  # Enabling it requires application services or aliases for
+  # AuditEntryFactoryInterface, AuditStorageInterface and Psr\Clock\ClockInterface.
+  transactional:
+    enabled: false
+
+  # Legacy asynchronous message persistence configuration
   async:
-    # Set to true to dispatch audit messages to Messenger (recommended)
+    # Set to true to dispatch legacy audit messages to Messenger
     # Set to false for synchronous persistence (audit records written immediately)
     enabled: true
 
-    # Messenger transport name where PersistAuditEntryMessage will be dispatched
-    # Must match a transport configured in config/packages/messenger.yaml
+    # Historical compatibility key. The effective transport for
+    # PersistAuditEntryMessage is selected by Messenger routing, not this value.
     transport: 'async'
 
   # Doctrine listener configuration - what operations to track

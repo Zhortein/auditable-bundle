@@ -8,6 +8,7 @@
     <testsuites>
         <testsuite name="AuditableBundle">
             <directory>tests</directory>
+            <exclude>tests/Integration/PostgreSql</exclude>
         </testsuite>
     </testsuites>
 
