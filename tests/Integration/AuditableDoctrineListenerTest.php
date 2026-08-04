@@ -12,11 +12,6 @@ use Zhortein\AuditableBundle\Metadata\AuditableMetadataProvider;
 
 final class AuditableDoctrineListenerTest extends TestCase
 {
-    public function testListenerIsInstantiable(): void
-    {
-        $this->markTestSkipped('Requires Doctrine integration setup');
-    }
-
     public function testAuditableEntityMetadata(): void
     {
         $metadataProvider = new AuditableMetadataProvider();
@@ -40,6 +35,35 @@ final class AuditableDoctrineListenerTest extends TestCase
         $metadata = $metadataProvider->getFor($entity);
 
         self::assertNull($metadata);
+    }
+
+    public function testDefaultLabelEmptyFieldLabelAndCache(): void
+    {
+        $metadataProvider = new AuditableMetadataProvider();
+        $entity = new DefaultMetadataEntity();
+
+        $first = $metadataProvider->getFor($entity);
+        $second = $metadataProvider->getFor($entity);
+
+        self::assertNotNull($first);
+        self::assertSame('DefaultMetadataEntity', $first->label);
+        self::assertNull($first->context);
+        self::assertSame([], $first->fieldLabels);
+        self::assertSame([], $first->ignoredFields);
+        self::assertSame($first, $second);
+    }
+
+    public function testNonAuditableResultIsCached(): void
+    {
+        $provider = new AuditableMetadataProvider();
+        $entity = new NonAuditableTestEntity();
+
+        self::assertNull($provider->getFor($entity));
+        self::assertNull($provider->getFor($entity));
+        $cache = new \ReflectionProperty($provider, 'cache');
+        $cacheValue = $cache->getValue($provider);
+        self::assertIsArray($cacheValue);
+        self::assertArrayHasKey(NonAuditableTestEntity::class, $cacheValue);
     }
 }
 
@@ -85,5 +109,17 @@ final class NonAuditableTestEntity
     public function setName(string $name): void
     {
         $this->name = $name;
+    }
+}
+
+#[Auditable]
+final class DefaultMetadataEntity
+{
+    #[AuditField(label: '   ')]
+    private string $emptyLabel = '';
+
+    public function getEmptyLabel(): string
+    {
+        return $this->emptyLabel;
     }
 }
