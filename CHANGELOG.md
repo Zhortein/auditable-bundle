@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-08-04
+
 ### Added
 
 - Add immutable transactional contracts and models for events, records, subjects and actors.
@@ -20,7 +22,7 @@
 
 ### Compatibility
 
-- Require Doctrine ORM 3.x and DoctrineBundle 2.19 or 3.x for the future 2.x series.
+- Require Doctrine ORM 3.x and DoctrineBundle 2.19 or 3.x for the 2.x series.
 - Support PHP 8.3 through 8.5 and Symfony 7.4, 8.0 and 8.1 on the executed CI boundaries.
 - Add a direct runtime dependency on `symfony/polyfill-mbstring`, allowing operation without the native extension.
 - Preserve the default legacy runtime, `AuditEntry` mapping, table schema, service aliases and fail-open behavior. Existing applications need no mandatory SQL migration when retaining the default mapping.

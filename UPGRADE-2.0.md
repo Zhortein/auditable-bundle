@@ -1,6 +1,6 @@
 # Upgrade from 1.0.0 to 2.0.0
 
-This guide describes how to prepare an application for the future 2.x series. It does not announce a release and it does not replace application-specific migration review.
+This guide describes how to prepare an application for the 2.x series. It does not replace application-specific migration review.
 
 ## Breaking platform changes
 
